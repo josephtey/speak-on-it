@@ -83,14 +83,14 @@ const Home = (props) => {
   };
   const [form] = Form.useForm();
   return (
-    <div className="flex w-full justify-center content-center h-screen flex-wrap flex-col">
+    <div className="flex w-full justify-center content-center h-screen flex-wrap flex-col font-serif">
       <div
         className="text-6xl text-center font-bold mb-8 mx-32"
         style={{
           lineHeight: "70px",
         }}
       >
-        Speak on it!
+        Speak On It
       </div>
       <Form
         form={form}
@@ -134,7 +134,7 @@ const Home = (props) => {
         }}
         htmlType="submit"
       >
-        Speak!
+        Speak
       </div>
     </div>
   );

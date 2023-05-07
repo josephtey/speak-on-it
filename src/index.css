@@ -11,6 +11,153 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* --- General Layout & UI --- */
+
+:root {
+  --dot-size: 1rem;
+  --animation-duration: 2s;
+}
+main {
+  margin: 0 auto;
+  max-width: 30rem;
+  padding: 3em 2em;
+  border: 0.25rem dotted #a8dadc;
+  border-radius: 1rem;
+}
+footer {
+  font-size: 0.875rem;
+  text-align: center;
+  position: sticky;
+  padding: 1rem;
+  padding-top: 2rem;
+  bottom: 0;
+}
+h1, h2, a {
+  color: #247ba0;
+}
+a:hover {
+  color: #000;
+  text-decoration-color: purple;
+}
+p {
+  line-height: 1.375;
+}
+h1 {
+  margin: 0 0 2rem;
+  font-size: calc(2rem + 1vw);
+  line-height: 1.125;
+  text-align: center;
+}
+h2 {
+  margin-top: 3rem;
+  font-size: 1.5rem;
+}
+.flex-container {
+  margin: 3rem 0;
+  display: flex;
+  justify-content: center;
+}
+.flex-container > * {
+  margin: 0 1rem;
+}
+.dot {
+  width: var(--dot-size);
+  height: var(--dot-size);
+  background-color: purple;
+  border-radius: 50%;
+}
+
+
+/* --- Animation --- */
+
+/* Define animation keyframes */
+@keyframes blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Minimal example */
+.dot--basic {
+  animation: blink 2s infinite;
+}
+
+/* Run animation once */
+.dot--once {
+  animation: blink 2s 1;
+  /* animation-iteration-count: 1; */
+}
+
+/* Wait 4s before running the animation */
+.dot--delayed {
+  animation: blink 2s infinite 4s;
+  /* animation-delay: 4s; */
+}
+
+/* Use frames with "from" and "to" */
+@keyframes choppyBlink {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.dot--choppy {
+  animation: choppyBlink 2s infinite;
+  /* animation-name: choppyBlink; */
+}
+
+/* Animate multiple properties (transform and color) */
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(0) translateY(-75%);
+    background-color: blue;
+  }
+  33% {
+    background-color: orange;
+  }
+  50% { 
+    transform: scale(1.125) translateY(0);
+    background-color: purple;
+  }
+}
+.dot--pulse {
+  animation: pulse 8s infinite;
+}
+
+/* Disable animation if user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+  }
+}
+
+
+/* --- Sample Usage --- */
+
+.sample-item {
+  --dot-size: 0.5rem;
+  --offline-color: #999;
+  --offline-text-color: #666;
+  
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid purple;
+  border-radius: 4px;
+  padding: .5rem 1rem;
+}
+
+.sample-item .dot {
+  margin-right: .5rem;
+}
+
+.sample-item--offline {
+  border-color: var(--offline-color);
+  color: var(--offline-text-color);
+}
+
+.sample-item--offline .dot {
+  animation: none;
+  background-color: var(--offline-color);
+}
+
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
