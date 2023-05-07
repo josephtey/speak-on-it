@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@chengsokdara/use-whisper": "^0.2.0",
+    "@dqbd/tiktoken": "^1.0.7",
     "@ffmpeg/core": "^0.11.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -11,7 +12,7 @@
     "antd": "^5.4.6",
     "fa-icons": "^0.2.0",
     "firebase": "^9.21.0",
-    "langchain": "^0.0.70",
+    "langchain": "^0.0.44",
     "openai-streaming-hooks": "^1.0.4",
     "react": "^18.2.0",
     "react-contenteditable": "^3.3.7",

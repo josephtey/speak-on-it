@@ -1,5 +1,5 @@
 import react, { useEffect, useState, useRef } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../utils/firebase";
 import { useParams } from "react-router";
 import { useChatCompletion, GPT4, GPT35 } from "openai-streaming-hooks";
@@ -14,7 +14,6 @@ import AudioStream from "../utils/AudioStream";
 
 const elevenLabsAPI = "";
 const secretKey = "";
-
 const generateSystemPrompt = (
   essayPrompt,
   studentName
@@ -38,13 +37,6 @@ The student's name is ${studentName}`;
 const generateEssayPrompt = (essay) => `
   Hi Liz. Here is my essay: ${essay}
 `;
-
-function replaceAll(str, search, replacement) {
-  // Create a regular expression with the global flag to match all occurrences
-  const regex = new RegExp(search, "g");
-  // Use the replace() method with the regular expression
-  return str.replace(regex, replacement);
-}
 
 const Chat = () => {
   const { id } = useParams();
@@ -81,12 +73,18 @@ const Chat = () => {
   });
   const isLoading = messages[messages.length - 1]?.meta?.loading;
   useEffect(() => {
+    const update = async () => {
+      const essaysRef = doc(db, "essays", id);
+
+      await updateDoc(essaysRef, {
+        transcript: messages,
+      });
+    };
     if (textInput.current) {
       if (!isLoading) {
         setUserState("default");
-        setTextToVoice(
-          replaceAll(messages[messages.length - 1].content, "<br />", " ")
-        );
+        setTextToVoice(messages[messages.length - 1].content);
+        update();
         // generate voices
         // show the animation of streaming ...
         // setIsListening(true);
