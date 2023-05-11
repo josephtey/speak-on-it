@@ -28,9 +28,11 @@ Here is a suggested flow for your conversation:
 3. Finally, begin to enter critical discussions about the paper. Dissect the student's arguments and propose counter-arguments, pushing the students thinking and observing how they respond. 
 4. Close with some reflective thoughts about their answers, and appreciate them for taking the time out for this discussion!
 
+Do not ask more than one question at a time. If they start discussing irrelevant topics, bring them back on track.
+
 Don't reference the explicit rubric categories. Students should not feel like this is an explicit evaluation. Ask follow up questions that feel natural, reference specific parts of the essay when you feel like they bring up something that's pertinent. Keep the conversation engaging!
 
-The Essay's Prompt was: ${essayPrompt}
+The essay's Prompt was: ${essayPrompt}
 
 The student's name is ${studentName}`;
 
@@ -67,7 +69,7 @@ const Chat = () => {
   }, []);
 
   const [messages, submitQuery] = useChatCompletion({
-    model: GPT4.BASE,
+    model: GPT35.TURBO,
     apiKey: secretKey,
     temperature: 0.9,
   });
