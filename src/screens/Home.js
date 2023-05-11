@@ -75,6 +75,7 @@ const Home = (props) => {
 
     const essaysRef = collection(db, "essays");
     const newDoc = await addDoc(essaysRef, {
+      name: values.name,
       essay: values.essay,
       prompt: values.essayPrompt,
     });
@@ -83,15 +84,18 @@ const Home = (props) => {
   };
   const [form] = Form.useForm();
   return (
-    <div className="flex w-full justify-center content-center h-screen flex-wrap flex-col font-serif">
+    <div className="flex w-full justify-center content-center h-screen flex-wrap flex-col">
       <div
-        className="text-6xl text-center font-bold mb-8 mx-32"
+        className="text-6xl text-center font-bold mb-4 mx-32"
         style={{
           lineHeight: "70px",
         }}
       >
         Speak On It
       </div>
+      <p className="text-center text-lg text-gray-400">
+        Evaluation through Conversation
+      </p>
       <Form
         form={form}
         layout="vertical"
@@ -101,6 +105,13 @@ const Home = (props) => {
         }}
         className="py-16"
       >
+        <Form.Item
+          label="What's your name?"
+          name="name"
+          rules={[{ required: true, message: "Your name can't be empty!" }]}
+        >
+          <Input placeholder="e.g. Bob" />
+        </Form.Item>
         <Form.Item
           label="Paste the prompt of your essay here"
           name="essayPrompt"
@@ -133,7 +144,7 @@ const Home = (props) => {
         }}
         htmlType="submit"
       >
-        Speak
+        Try Now!
       </div>
     </div>
   );

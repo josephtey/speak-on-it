@@ -3,6 +3,7 @@ import { db } from "../utils/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { useParams } from "react-router";
 import { ChatOpenAI } from "langchain/chat_models";
+import ReactLoading from "react-loading";
 import {
   HumanChatMessage,
   SystemChatMessage,
@@ -56,8 +57,8 @@ Overall, it's essential to acknowledge the limitations of any theory and remain 
 Thank you for engaging in this thoughtful discussion about your essay, Shaurya. I appreciate your willingness to reflect on your understanding and explore different aspects of the mind-body problem and multiple realizability. Keep up the good work and continue to engage in meaningful conversations like this one!
 
 `;
-const generateEvaluationPrompt = () => {
-  return `You are an AI teaching assistant called Liz. Your goal is to receive a transcript between an AI oral conversational agent, Liz, and a student. Your goal is to evaluate the student's answer according to the following formative assessment rubric. 
+const generateEvaluationPrompt = (name) => {
+  return `You are an AI teaching assistant called Liz. Your goal is to receive a transcript between an AI oral conversational agent, Liz, and a student, ${name}. Your goal is to evaluate the ${name} answer according to the following formative assessment rubric. 
 
   Formative Assessment Rubric for Essay Evaluation
   
@@ -135,15 +136,15 @@ const generateEvaluationPrompt = () => {
   `;
 };
 
-const generateTranscriptPrompt = (transcript) => {
+const generateTranscriptPrompt = (transcript, name) => {
   return `
-    Hi. Here is the transcript of the interaction between Liz and the student: 
+    Hi. Here is the transcript of the interaction between Liz and ${name}: 
 
     ${transcript}
   `;
 };
 
-const evaluateTranscript = async (transcript) => {
+const evaluateTranscript = async (transcript, name) => {
   const chat = new ChatOpenAI({
     temperature: 0,
     modelName: "gpt-4",
@@ -152,10 +153,9 @@ const evaluateTranscript = async (transcript) => {
 
   const response = await chat.call([
     new SystemChatMessage(generateEvaluationPrompt()),
-    new HumanChatMessage(generateTranscriptPrompt(transcript)),
+    new HumanChatMessage(generateTranscriptPrompt(transcript, name)),
   ]);
 
-  console.log(response.text);
   return response.text;
 };
 
@@ -163,7 +163,9 @@ const Evaluate = () => {
   const { id } = useParams();
 
   const [data, setData] = useState(null);
+  const [evaluation, setEvaluation] = useState(null);
   const [cleanedTranscript, setCleanedTranscript] = useState("");
+  const [isEvaluating, setIsEvaluating] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -181,7 +183,11 @@ const Evaluate = () => {
       for (let i = 2; i < c_transcript.length; i++) {
         m_transcript += `${c_transcript[i].role}: ${c_transcript[i].content}\n`;
       }
+      console.log(m_transcript);
 
+      if (docSnap.data().evaluation) {
+        setEvaluation(docSnap.data().evaluation);
+      }
       setCleanedTranscript(m_transcript);
     };
 
@@ -190,23 +196,152 @@ const Evaluate = () => {
 
   useEffect(() => {
     const evaluate = async () => {
-      const results = await evaluateTranscript(sampleTranscript);
+      setIsEvaluating(true);
+      const results = await evaluateTranscript(cleanedTranscript, data.name);
       const parsedResults = JSON.parse(results.replaceAll("\n", "").trim());
-
       const essaysRef = doc(db, "essays", id);
 
       await updateDoc(essaysRef, {
         evaluation: parsedResults,
       });
+
+      setIsEvaluating(false);
+
+      setEvaluation(parsedResults);
     };
-    if (!data?.evaluation && cleanedTranscript) {
+    if (!data?.evaluation && data?.name && cleanedTranscript) {
       evaluate();
     }
   }, [cleanedTranscript, data]);
 
-  return data ? (
-    <div className="flex w-full justify-center content-center h-screen flex-wrap flex-col font-serif">
-      {data.evaluation ? data.evaluation : null}
+  return evaluation ? (
+    <div className="flex justify-center content-center w-full py-24">
+      <div className="w-9/12 justify-center content-center font-serif flex flex-col gap-8">
+        <div className="text-2xl mb-16">
+          <span className="text-3xl">
+            <b>
+              {evaluation.rubric["conceptual_understanding"].score +
+                evaluation.rubric["critical_thinking"].score +
+                evaluation.rubric["paper_understanding"].score +
+                evaluation.rubric["reflection"].score}
+              /12
+            </b>{" "}
+            <br />
+            <br />
+            <b className="text-2xl">Overall Score</b>
+          </span>
+          <br />
+          <p className="pb-4">{evaluation.summary.reflection}</p>
+        </div>
+
+        <div className="mb-8 text-xl">
+          <b>Conceptual Understanding: </b>{" "}
+          {evaluation.rubric["conceptual_understanding"].score}/3
+          <br />
+          <p className="pb-4">
+            {evaluation.rubric["conceptual_understanding"].reason}
+          </p>
+          <div className="my-4 text-gray-600">What did the student say?</div>
+          <div className="flex flex-row gap-4">
+            {evaluation.rubric["conceptual_understanding"].quotes.map(
+              (quote, i) => {
+                return (
+                  <div className="flex flex-col gap-4">
+                    <div className="rounded-lg bg-gray-200 p-4 opacity-50 flex-1">
+                      {quote}
+                    </div>
+                    <div className="p-4 rounded-lg text-white bg-gray-800 p-4 flex-1">
+                      {
+                        evaluation.rubric["conceptual_understanding"]
+                          .quote_reasons[i]
+                      }
+                    </div>
+                  </div>
+                );
+              }
+            )}
+          </div>
+        </div>
+
+        <div className="mb-8 text-xl">
+          <b>Critical Thinking: </b>{" "}
+          {evaluation.rubric["critical_thinking"].score}/3
+          <br />
+          <p className="pb-4">
+            {evaluation.rubric["critical_thinking"].reason}
+          </p>
+          <div className="my-4 text-gray-600">What did the student say?</div>
+          <div className="flex flex-row gap-4">
+            {evaluation.rubric["critical_thinking"].quotes.map((quote, i) => {
+              return (
+                <div className="flex flex-col gap-4">
+                  <div className="rounded-lg bg-gray-200 p-4 opacity-50 flex-1">
+                    {quote}
+                  </div>
+                  <div className="p-4 rounded-lg text-white bg-gray-800 p-4 flex-1">
+                    {evaluation.rubric["critical_thinking"].quote_reasons[i]}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mb-8 text-xl">
+          <b>Paper Understanding: </b>{" "}
+          {evaluation.rubric["paper_understanding"].score}/3
+          <br />
+          <p className="pb-4">
+            {evaluation.rubric["paper_understanding"].reason}
+          </p>
+          <div className="my-4 text-gray-600">What did the student say?</div>
+          <div className="flex flex-row gap-4">
+            {evaluation.rubric["paper_understanding"].quotes.map((quote, i) => {
+              return (
+                <div className="flex flex-col gap-4">
+                  <div className="rounded-lg bg-gray-200 p-4 opacity-50 flex-1">
+                    {quote}
+                  </div>
+                  <div className="p-4 rounded-lg text-white bg-gray-800 p-4 flex-1">
+                    {evaluation.rubric["paper_understanding"].quote_reasons[i]}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mb-8 text-xl">
+          <b>Reflection: </b> {evaluation.rubric["reflection"].score}/3
+          <br />
+          <p className="pb-4">{evaluation.rubric["reflection"].reason}</p>
+          <div className="my-4 text-gray-600">What did the student say?</div>
+          <div className="flex flex-row gap-4">
+            {evaluation.rubric["reflection"].quotes.map((quote, i) => {
+              return (
+                <div className="flex flex-col gap-4">
+                  <div className="rounded-lg bg-gray-200 p-4 opacity-50 flex-1">
+                    {quote}
+                  </div>
+                  <div className="p-4 rounded-lg text-white bg-gray-800 p-4 flex-1">
+                    {evaluation.rubric["reflection"].quote_reasons[i]}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  ) : isEvaluating ? (
+    <div className="flex flex-row items-center">
+      <ReactLoading
+        className="mr-2"
+        type={"spin"}
+        color={"black"}
+        height={15}
+        width={15}
+      />{" "}
     </div>
   ) : null;
 };

@@ -12,8 +12,8 @@ import LizStationary from "../img/liz_stationary.gif";
 import Liz from "../img/liz.gif";
 import AudioStream from "../utils/AudioStream";
 
-const elevenLabsAPI = "";
-const secretKey = "";
+const elevenLabsAPI = process.env.REACT_APP_ELEVEN_LABS_KEY;
+const secretKey = process.env.REACT_APP_OPENAI_API_KEY;
 const generateSystemPrompt = (
   essayPrompt,
   studentName
@@ -123,7 +123,7 @@ const Chat = () => {
     if (data) {
       submitQuery([
         {
-          content: generateSystemPrompt(data.essayPrompt, "Joe"),
+          content: generateSystemPrompt(data.essayPrompt, data.name),
           role: "system",
         },
         { content: generateEssayPrompt(data.essay), role: "user" },
@@ -143,7 +143,7 @@ const Chat = () => {
 
   return data ? (
     <>
-      <div className="flex w-1/2 mx-96 my-60 justify-left flex-wrap flex-col relative">
+      <div className="flex w-1/2 mx-96 my-48 justify-left flex-wrap flex-col relative">
         <span
           className={`w-48 text-center text-gray-600 fade-in mb-4 font-serif text-xl`}
         >
