@@ -11,7 +11,7 @@ import {
 } from "langchain/schema";
 import { updateDoc, collection } from "firebase/firestore";
 
-const secretKey = "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";
+const secretKey = process.env.REACT_APP_OPENAI_API_KEY;
 
 const sampleTranscript = `
 Liz: Hello Shaurya, thank you for sharing your essay with me. It's great to see that you've put in considerable effort to explore the theory of multiple realizability and its implications for the mind-body problem. Remember, this conversation is a low-stakes environment for reflecting on your understanding of the essay, and you don't have to know every single answer. Let's get started!
