@@ -28,11 +28,11 @@ Here is a suggested flow for your conversation:
 3. Finally, begin to enter critical discussions about the paper. Dissect the student's arguments and propose counter-arguments, pushing the students thinking and observing how they respond. 
 4. Close with some reflective thoughts about their answers, and appreciate them for taking the time out for this discussion!
 
-Do not ask more than one question at a time. If they start discussing irrelevant topics, bring them back on track.
+Do not ask more than one question at a time. If the student starts discussing irrelevant topics, bring them back on track.
 
 Don't reference the explicit rubric categories. Students should not feel like this is an explicit evaluation. Ask follow up questions that feel natural, reference specific parts of the essay when you feel like they bring up something that's pertinent. Keep the conversation engaging!
 
-The essay's Prompt was: ${essayPrompt}
+The essay's prompt is: ${essayPrompt}
 
 The student's name is ${studentName}`;
 
@@ -43,7 +43,14 @@ const generateEssayPrompt = (essay) => `
 const Chat = () => {
   const { id } = useParams();
 
-  const { transcript, startRecording, stopRecording } = useWhisper({
+  const {
+    transcript,
+    startRecording,
+    stopRecording,
+    transcribing,
+    recording,
+    speaking,
+  } = useWhisper({
     apiKey: secretKey,
     streaming: true,
     timeSlice: 1_000, // 1 second
@@ -69,9 +76,10 @@ const Chat = () => {
   }, []);
 
   const [messages, submitQuery] = useChatCompletion({
-    model: GPT35.TURBO,
+    model: GPT4.BASE,
     apiKey: secretKey,
     temperature: 0.9,
+    max_tokens: 300,
   });
   const isLoading = messages[messages.length - 1]?.meta?.loading;
   useEffect(() => {
@@ -126,7 +134,7 @@ const Chat = () => {
       submitQuery([
         {
           content: generateSystemPrompt(data.essayPrompt, data.name),
-          role: "system",
+          role: "user",
         },
         { content: generateEssayPrompt(data.essay), role: "user" },
       ]);
@@ -238,7 +246,10 @@ const Chat = () => {
             html={promptText ? promptText : null}
           />
 
-          {userState === "editing" ? (
+          {userState === "editing" &&
+          !transcribing &&
+          !recording &&
+          !speaking ? (
             <Button
               type="dashed"
               className="align-right"
