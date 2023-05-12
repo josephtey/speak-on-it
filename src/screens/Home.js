@@ -181,10 +181,12 @@ const Home = (props) => {
       ) : (
         <div className="flex flex-row gap-8 w-full px-48 py-8">
           <p className="w-1/2 h-screen overflow-scroll">
+            <h1>The Game of Nimm</h1>
             Nimm is an ancient game of strategy that is named after the old
             German word for "take." It is also called Tiouk Tiouk in West Africa
             and Tsynshidzi in China. Players alternate taking stones until there
             are zero left. The game of Nimm goes as follows: <br />
+            <br />
             <ol>
               <li>
                 1. The game starts with a pile of 20 stones between the players
@@ -199,6 +201,7 @@ const Home = (props) => {
                 stones.{" "}
               </li>
             </ol>
+            <br />
             The last player to take a stone loses. To make your life easier we
             have broken the problem down into smaller milestones. You have a lot
             of time for this program. Take it slowly, piece by piece.

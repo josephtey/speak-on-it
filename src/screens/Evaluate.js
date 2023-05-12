@@ -125,7 +125,7 @@ const Evaluate = () => {
 
   return evaluation ? (
     <div className="flex justify-center content-center w-full py-24">
-      <div className="w-9/12 justify-center content-center font-serif flex flex-col gap-8">
+      <div className="w-9/12 justify-center content-center flex flex-col gap-8">
         <div className="text-2xl mb-16">
           <span className="text-3xl">
             <b>
