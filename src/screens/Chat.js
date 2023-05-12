@@ -5,40 +5,23 @@ import { useParams } from "react-router";
 import { useChatCompletion, GPT4, GPT35 } from "openai-streaming-hooks";
 import ReactLoading from "react-loading";
 import { useWhisper } from "@chengsokdara/use-whisper";
-import { Button } from "antd";
+import { Button, Modal } from "antd";
 import ContentEditable from "react-contenteditable";
 import { Typewriter } from "typewriting-react";
 import LizStationary from "../img/liz_stationary.gif";
 import Liz from "../img/liz.gif";
 import textToSpeech from "../utils/elevenLabs";
+import {
+  generateEssaySystemPrompt,
+  generateEssayUserPrompt,
+} from "../prompts/essay";
+import {
+  generateCodeSystemPrompt,
+  generateCodeUserPrompt,
+} from "../prompts/code";
 
 const elevenLabsAPI = process.env.REACT_APP_ELEVEN_LABS_KEY;
 const secretKey = process.env.REACT_APP_OPENAI_API_KEY;
-const generateSystemPrompt = (
-  essayPrompt,
-  studentName
-) => `You are an AI conversational exam conductor named Liz. You are kind, caring, and want to hear how your students thought through their essay. At the same time, you want to reflect a student's level of understanding of their essay through this conversation. 
-
-Your goal is to read student essays and then conducting oral conversations with students about the essays that they have written. Your goal is to ask questions in line with a provided formative assessment rubric exploring their Critical Thinking, Conceptual Understanding, Reflection, and Paper Understanding. 
-
-Here is a suggested flow for your conversation: 
-1. Greet them, and welcome them to the conversation. Reassure them that they don't have to know every single answer to these questions, and it's a low-stakes environment to reflect their overall understanding of their essay. 
-2. First few questions, build rapport with your student and understand their reflections on the process. 
-2. Next few questions, understand how well they understand their paper, and the concepts they choose. Pick a phrase, idea, or figure of interest to you from the paper and ask them to flesh out the purpose of its mention. 
-3. Finally, begin to enter critical discussions about the paper. Dissect the student's arguments and propose counter-arguments, pushing the students thinking and observing how they respond. 
-4. Close with some reflective thoughts about their answers, and appreciate them for taking the time out for this discussion!
-
-Do not ask more than one question at a time. If the student starts discussing irrelevant topics, bring them back on track.
-
-Don't reference the explicit rubric categories. Students should not feel like this is an explicit evaluation. Ask follow up questions that feel natural, reference specific parts of the essay when you feel like they bring up something that's pertinent. Keep the conversation engaging!
-
-The essay's prompt is: ${essayPrompt}
-
-The student's name is ${studentName}`;
-
-const generateEssayPrompt = (essay) => `
-  Hi Liz. Here is my essay: ${essay}
-`;
 
 const Chat = () => {
   const { id } = useParams();
@@ -60,6 +43,7 @@ const Chat = () => {
   });
 
   const [promptText, setPromptText] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [AIState, setAIState] = useState("thinking");
   // thinking -> gpt generation...
   // speaking -> liz is talking (typewriter animation!)
@@ -73,7 +57,7 @@ const Chat = () => {
   const [data, setData] = useState();
   useEffect(() => {
     const fetchData = async () => {
-      const docRef = doc(db, "essays", id);
+      const docRef = doc(db, "assns", id);
       const docSnap = await getDoc(docRef);
       setData(docSnap.data());
     };
@@ -90,7 +74,7 @@ const Chat = () => {
   const isLoading = messages[messages.length - 1]?.meta?.loading; //GPT loading
   useEffect(() => {
     const update = async () => {
-      const essaysRef = doc(db, "essays", id);
+      const essaysRef = doc(db, "assns", id);
 
       await updateDoc(essaysRef, {
         transcript: messages,
@@ -137,13 +121,23 @@ const Chat = () => {
 
   useEffect(() => {
     if (data) {
-      submitQuery([
-        {
-          content: generateSystemPrompt(data.essayPrompt, data.name),
-          role: "user",
-        },
-        { content: generateEssayPrompt(data.essay), role: "user" },
-      ]);
+      if (data.type === "code") {
+        submitQuery([
+          {
+            content: generateCodeSystemPrompt(data.codeAssignment, data.name),
+            role: "system",
+          },
+          { content: generateCodeUserPrompt(data.code), role: "user" },
+        ]);
+      } else {
+        submitQuery([
+          {
+            content: generateEssaySystemPrompt(data.essayPrompt, data.name),
+            role: "system",
+          },
+          { content: generateEssayUserPrompt(data.essay), role: "user" },
+        ]);
+      }
     }
   }, [data]);
 
@@ -269,6 +263,37 @@ const Chat = () => {
             </Button>
           ) : null}
         </div>
+        <Modal
+          title="Reference"
+          open={isModalOpen}
+          onOk={() => {
+            setIsModalOpen(false);
+          }}
+          onCancel={() => {
+            setIsModalOpen(false);
+          }}
+        >
+          {data?.type === "code" ? (
+            <div>
+              {data.code.split("\n").map((para) => {
+                return <p>{para}</p>;
+              })}
+            </div>
+          ) : (
+            <div>{data.essay}</div>
+          )}
+        </Modal>
+        <Button
+          className="absolute top-4 right-4"
+          onClick={() => {
+            setIsModalOpen(true);
+          }}
+        >
+          See{" "}
+          <span className="ml-1">
+            {data?.type === "essay" ? <>Essay</> : <>Code</>}
+          </span>
+        </Button>
       </div>
     </>
   ) : (

@@ -14,7 +14,7 @@ function App() {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/chat/:id" component={Chat} />
-          <Route exact path="/evaluate/:id" component={Evaluate} />
+          <Route exact path="/evaluate/:id/" component={Evaluate} />
         </Switch>
       </Router>
       <ToastContainer />
