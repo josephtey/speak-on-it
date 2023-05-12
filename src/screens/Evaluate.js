@@ -18,6 +18,29 @@ import {
 
 const secretKey = process.env.REACT_APP_OPENAI_API_KEY;
 
+function capitalizeWords(arr) {
+  return arr.map((word) => {
+    const firstLetter = word.charAt(0).toUpperCase();
+    const rest = word.slice(1).toLowerCase();
+
+    return firstLetter + rest;
+  });
+}
+
+const rubric_categories = {
+  code: [
+    "critical_thinking",
+    "code_understanding",
+    "reflection",
+    "problem_solving",
+  ],
+  essay: [
+    "conceptual_understanding",
+    "critical_thinking",
+    "paper_understanding",
+    "reflection",
+  ],
+};
 const evaluateTranscript = async (transcript, name, type) => {
   const chat = new ChatOpenAI({
     temperature: 0,
@@ -106,10 +129,7 @@ const Evaluate = () => {
         <div className="text-2xl mb-16">
           <span className="text-3xl">
             <b>
-              {evaluation.rubric["conceptual_understanding"].score +
-                evaluation.rubric["critical_thinking"].score +
-                evaluation.rubric["paper_understanding"].score +
-                evaluation.rubric["reflection"].score}
+              {evaluation.summary["overall_score"]}
               /12
             </b>{" "}
             <br />
@@ -120,100 +140,33 @@ const Evaluate = () => {
           <p className="pb-4">{evaluation.summary.reflection}</p>
         </div>
 
-        <div className="mb-8 text-xl">
-          <b>Conceptual Understanding: </b>{" "}
-          {evaluation.rubric["conceptual_understanding"].score}/3
-          <br />
-          <p className="pb-4">
-            {evaluation.rubric["conceptual_understanding"].reason}
-          </p>
-          <div className="my-4 text-gray-600">What did the student say?</div>
-          <div className="flex flex-row gap-4">
-            {evaluation.rubric["conceptual_understanding"].quotes.map(
-              (quote) => {
-                return (
-                  <div className="flex flex-col gap-4">
-                    <div className="rounded-lg bg-gray-200 p-4 opacity-50 flex-1">
-                      {quote.quote}
+        {rubric_categories[data?.type].map((category) => {
+          return (
+            <div className="mb-8 text-xl">
+              <b>{capitalizeWords(category.split("_")).join(" ")}:</b>{" "}
+              {evaluation.rubric[category].score}/3
+              <br />
+              <p className="pb-4">{evaluation.rubric[category].reason}</p>
+              <div className="my-4 text-gray-600">
+                What did the student say?
+              </div>
+              <div className="flex flex-row gap-4">
+                {evaluation.rubric[category].quotes.map((quote) => {
+                  return (
+                    <div className="flex flex-col gap-4">
+                      <div className="rounded-lg bg-gray-200 p-4 opacity-50 flex-1">
+                        {quote.quote}
+                      </div>
+                      <div className="p-4 rounded-lg text-white bg-gray-800 p-4 flex-1">
+                        {quote.reason}
+                      </div>
                     </div>
-                    <div className="p-4 rounded-lg text-white bg-gray-800 p-4 flex-1">
-                      {quote.reason}
-                    </div>
-                  </div>
-                );
-              }
-            )}
-          </div>
-        </div>
-
-        <div className="mb-8 text-xl">
-          <b>Critical Thinking: </b>{" "}
-          {evaluation.rubric["critical_thinking"].score}/3
-          <br />
-          <p className="pb-4">
-            {evaluation.rubric["critical_thinking"].reason}
-          </p>
-          <div className="my-4 text-gray-600">What did the student say?</div>
-          <div className="flex flex-row gap-4">
-            {evaluation.rubric["critical_thinking"].quotes.map((quote) => {
-              return (
-                <div className="flex flex-col gap-4">
-                  <div className="rounded-lg bg-gray-200 p-4 opacity-50 flex-1">
-                    {quote.quote}
-                  </div>
-                  <div className="p-4 rounded-lg text-white bg-gray-800 p-4 flex-1">
-                    {quote.reason}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mb-8 text-xl">
-          <b>Paper Understanding: </b>{" "}
-          {evaluation.rubric["paper_understanding"].score}/3
-          <br />
-          <p className="pb-4">
-            {evaluation.rubric["paper_understanding"].reason}
-          </p>
-          <div className="my-4 text-gray-600">What did the student say?</div>
-          <div className="flex flex-row gap-4">
-            {evaluation.rubric["paper_understanding"].quotes.map((quote) => {
-              return (
-                <div className="flex flex-col gap-4">
-                  <div className="rounded-lg bg-gray-200 p-4 opacity-50 flex-1">
-                    {quote.quote}
-                  </div>
-                  <div className="p-4 rounded-lg text-white bg-gray-800 p-4 flex-1">
-                    {quote.reason}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mb-8 text-xl">
-          <b>Reflection: </b> {evaluation.rubric["reflection"].score}/3
-          <br />
-          <p className="pb-4">{evaluation.rubric["reflection"].reason}</p>
-          <div className="my-4 text-gray-600">What did the student say?</div>
-          <div className="flex flex-row gap-4">
-            {evaluation.rubric["reflection"].quotes.map((quote) => {
-              return (
-                <div className="flex flex-col gap-4">
-                  <div className="rounded-lg bg-gray-200 p-4 opacity-50 flex-1">
-                    {quote.quote}
-                  </div>
-                  <div className="p-4 rounded-lg text-white bg-gray-800 p-4 flex-1">
-                    {quote.reason}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   ) : isEvaluating ? (

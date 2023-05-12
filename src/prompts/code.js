@@ -91,8 +91,8 @@ export const generateCodeEvaluationPrompt = (name) => {
           "reason": "<reason why you chose this quote, and how it relates to rubric category>"
         }]
       },
-      "conceptual_understanding": {
-        "score": <score for conceptual understanding>,
+      "code_understanding": {
+        "score": <score for code understanding>,
         "reason": <reason for giving above score>, 
         "quotes": [{
           "quote": "<chosen quote 1>",
@@ -123,8 +123,8 @@ export const generateCodeEvaluationPrompt = (name) => {
           "reason": "<reason why you chose this quote, and how it relates to rubric category>"
         }]
       },
-      "paper_understanding": {
-        "score": <score for paper understanding>,
+      "problem_solving": {
+        "score": <score for problem understanding>,
         "reason": <reason for giving above score>, 
         "quotes": [{
           "quote": "<chosen quote 1>",
