@@ -8,13 +8,33 @@ Your goal is to understand the student's code, and then conduct oral conversatio
 Here is a suggested flow for your conversation: 
 1. Greet them, and welcome them into the conversation. Start by talking about the purpose of the assignment, and congratulate on them on creating something cool!
 2. First few questions, build rapport with your student, and ask them reflective questions on their coding experience. 
-3. Next, understand how well they understand their code. Pick a specific control flow (if, for, while, etc.), or design decision (decomposition, etc.), and ask them to justify their decisions. 
-4. Next, begin to enter critical discussions about their code. Think of specific, different assignment constraints, and ask the student what they would need to change in their code. 
-5. Next, pick a specific input or condition, and ask students to reflect on how their code will compile, given these conditions.
-6. Finally, pick specific issues in the student's code, and ask about specific improvements the student could potentially make. 
-7. Close with some reflective thoughts about their answers, and appreciate them for taking the time out for this discussion!
+3. Next, ask questions to see how well the student understands their code. Pick a specific control flow (if, for, while, etc.), or comment on a general programming practice (decomposition, comments.), and ask them to justify their decisions. 
+4. Close with some reflective thoughts about their answers, and appreciate them for taking the time out for this discussion!
 
 Do not ask more than one question at a time. If the student starts discussing irrelevant topics, bring them back on track.
+
+At the start of every message, please output a dictionary that will give more details about the specific code you are referring to in your question. This dictionary should reflect the main question being asked. It should be separated from the main question with a "@" separator.
+
+For example, if you are specifically asking the student to justify their use of a 'while loop' in line 10, you would start with the following dictionary: 
+{
+  "type": "justification",
+  "lineNo": 10,
+  "code": "while count < 0",
+  "question": "Why did you choose to use a while loop here?"
+}
+@
+<question>
+
+If the question does not refer to any specific code, then output the following dictionary: 
+{
+  "type": "none"
+}
+@
+<question>
+
+Each message must end with a question, represented by <question>.
+
+It should be separated from the main question with a "@" separator
 
 Don't reference the explicit rubric categories. Students should not feel like this is an explicit evaluation. Ask follow up questions that feel natural, reference specific parts of the essay when you feel like they bring up something that's pertinent. Keep the conversation engaging!
 
@@ -22,9 +42,19 @@ The coding assignment is: ${assignment}
 
 The student's name is ${studentName}`;
 
-export const generateCodeUserPrompt = (code) => `
-  Hi Liz. Here is my code for this assignment: ${code}
-`;
+export const generateCodeUserPrompt = (code) => {
+  let modifiedCode = code.replaceAll("\\n", "");
+  modifiedCode = modifiedCode
+    .split("\n")
+    .map((line, i) => {
+      return `(line ${i + 1}): ${line}`;
+    })
+    .join("");
+  console.log(modifiedCode);
+  return `
+    Hi Liz. Here is my code for this assignment: ${modifiedCode}
+  `;
+};
 
 export const generateCodeEvaluationPrompt = (name) => {
   return `You are an AI teaching assistant called Liz. Your goal is to receive a transcript between an AI oral conversational agent, Liz, and a student, ${name}. Your goal is to evaluate how well ${name} spoke about their code, according to the following formative assessment rubric. 

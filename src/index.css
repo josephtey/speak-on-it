@@ -171,6 +171,12 @@ code {
   100% { opacity: 1; }
 }
 
+
 .ace_print-margin {
   visibility: hidden !important;
+}
+.marker-yellow {
+  background: yellow;
+  opacity: 0.2;
+  position: absolute;
 }

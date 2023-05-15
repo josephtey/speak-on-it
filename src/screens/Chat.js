@@ -45,6 +45,8 @@ const Chat = () => {
     },
   });
 
+  const [details, setDetails] = useState(null);
+  const [markers, setMarkers] = useState([]);
   const [promptText, setPromptText] = useState("");
   const [AIState, setAIState] = useState("thinking");
   // thinking -> gpt generation...
@@ -53,8 +55,11 @@ const Chat = () => {
   // listening -> user is speaking to the AI
   // editing -> user can edit the text!
 
+  const [currentText, setCurrentText] = useState("");
+  const [allText, setAllText] = useState("");
   const [textToVoice, setTextToVoice] = useState("");
   const textInput = useRef();
+  const mainInput = useRef();
 
   const [data, setData] = useState();
   useEffect(() => {
@@ -71,8 +76,19 @@ const Chat = () => {
     model: GPT4.BASE,
     apiKey: secretKey,
     temperature: 0.9,
-    max_tokens: 300,
   });
+
+  useEffect(() => {
+    if (messages?.length > 1) {
+      if (messages[messages.length - 1].content.includes("@")) {
+        setAIState("speaking");
+        setCurrentText(messages[messages.length - 1].content.split("@")[1]);
+      } else {
+        setAllText(messages[messages.length - 1].content);
+      }
+    }
+  }, [messages]);
+
   const isLoading = messages[messages.length - 1]?.meta?.loading; //GPT loading
   useEffect(() => {
     const update = async () => {
@@ -82,9 +98,34 @@ const Chat = () => {
         transcript: messages,
       });
     };
-    if (textInput.current) {
+    if (mainInput.current) {
       if (!isLoading) {
-        setAIState("waiting");
+        setAIState("editing");
+        // console.log(allText.split("@")[1]);
+        console.log("EVERYTHING: ", allText);
+
+        try {
+          const details = JSON.parse(
+            allText.split("@")[0].replaceAll("\n", "").trim()
+          );
+          setDetails(details);
+          console.log("DETAILS: ", details);
+          if (details.type !== "none") {
+            setMarkers([
+              {
+                startRow: details.lineNo - 1,
+                startCol: 1,
+                endRow: details.lineNo - 1,
+                endCol: 10,
+                className: "marker-yellow",
+                type: "fullLine",
+              },
+            ]);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        mainInput.current.focus();
         // setTextToVoice(messages[messages.length - 1].content);
         update();
         // generate voices
@@ -95,29 +136,29 @@ const Chat = () => {
     }
   }, [isLoading]);
 
-  useEffect(() => {
-    const keyDownHandler = (event) => {
-      if (event.key === "Enter") {
-        if (AIState === "waiting") {
-          startRecording();
-          setAIState("listening");
-        } else if (AIState === "listening") {
-          stopRecording();
-          setAIState("editing");
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const keyDownHandler = (event) => {
+  //     if (event.key === "Enter") {
+  //       if (AIState === "waiting") {
+  //         startRecording();
+  //         setAIState("listening");
+  //       } else if (AIState === "listening") {
+  //         stopRecording();
+  //         setAIState("editing");
+  //       }
+  //     }
+  //   };
 
-    document.addEventListener("keydown", keyDownHandler);
+  //   document.addEventListener("keydown", keyDownHandler);
 
-    return () => {
-      document.removeEventListener("keydown", keyDownHandler);
-    };
-  }, [AIState]);
-
+  //   return () => {
+  //     document.removeEventListener("keydown", keyDownHandler);
+  //   };
+  // }, [AIState]);
   const onSend = () => {
     submitQuery([{ content: promptText, role: "user" }]);
     setAIState("thinking");
+    setDetails(null);
     setPromptText("");
   };
 
@@ -156,56 +197,78 @@ const Chat = () => {
       //   similarity_boost: 0.6,
       // });
     }
+
+    if (AIState === "thinking") {
+      setCurrentText("");
+      setMarkers([]);
+    }
   }, [AIState]);
 
   return data ? (
     <div className="flex flex-col gap-4 items-center pt-48 w-full px-48">
       <div className="flex flex-row gap-4 justify-center w-full">
-        <div className="flex w-1/2 items-center pt-8 flex-wrap flex-col relative bg-white rounded-lg drop-shadow-md">
-          <span
-            className={`w-48 text-center text-gray-600 fade-in mb-4 font-serif text-md`}
-          >
-            {/* <AudioStream
-              voiceId={"21m00Tcm4TlvDq8ikWAM"}
-              text={textToVoice}
-              apiKey={elevenLabsAPI}
-              voiceSettings={{
-                stability: 0.75,
-                similarity_boost: 0.6,
-              }}
-              className="text-gray-100"
-              triggerVariable={{ isLoading }}
-            /> */}
-            {AIState}
-          </span>
-          {AIState === "thinking" ? (
-            <img src={Liz} className="rounded-lg w-24 mb-8" />
-          ) : (
-            <img src={LizStationary} className="rounded-lg w-24 mb-8" />
-          )}
-          <div>
-            {messages.length < 1
-              ? null
-              : messages.map((msg, i) => {
-                  return i > messages.length - 2 ? (
-                    msg.role === "assistant" ? (
-                      <div
-                        className="font-serif text-lg text-left px-8"
-                        id="content"
-                      >
-                        {msg.content}
-                      </div>
-                    ) : (
-                      <div className="font-serif text-lg text-right mb-16 mt-4 text-purple-600">
-                        {msg.content.split("<br />").map((para) => {
-                          return <p>{para}</p>;
-                        })}
-                      </div>
-                    )
-                  ) : null;
-                })}
+        <div className="flex w-1/2 pt-8 flex-wrap flex-col relative bg-white rounded-lg drop-shadow-md px-8">
+          <div className="flex flex-row justify-between items-center w-full">
+            <div className="flex flex-col items-center">
+              <span
+                className={`text-center text-gray-600 fade-in mb-4 font-serif text-md`}
+              >
+                {/* <AudioStream
+                    voiceId={"21m00Tcm4TlvDq8ikWAM"}
+                    text={textToVoice}
+                    apiKey={elevenLabsAPI}
+                    voiceSettings={{
+                      stability: 0.75,
+                      similarity_boost: 0.6,
+                    }}
+                    className="text-gray-100"
+                    triggerVariable={{ isLoading }}
+                  /> */}
+                <b>Liz</b>
+              </span>
+              {AIState === "thinking" ? (
+                <img src={Liz} className="rounded-lg w-36 mb-8" />
+              ) : (
+                <img src={LizStationary} className="rounded-lg w-36 mb-8" />
+              )}
+            </div>
+            {AIState === "thinking" ? (
+              <div className="p-4 w-1/2 fade-in fade-out text-gray-500 font-serif items-start">
+                Thinking...
+              </div>
+            ) : null}
+            {details?.question ? (
+              <div className="bg-yellow-300 rounded-lg p-4 w-1/2 fade-in">
+                {details.question}
+              </div>
+            ) : null}
           </div>
-          {AIState === "listening" ? (
+          <div>
+            <div className="font-serif text-lg text-left" id="content">
+              {currentText}
+            </div>
+            {/* {messages.length < 1
+                ? null
+                : messages.map((msg, i) => {
+                    return i > messages.length - 2 ? (
+                      msg.role === "assistant" ? (
+                        <div
+                          className="font-serif text-lg text-left px-8"
+                          id="content"
+                        >
+                          {msg.content}
+                        </div>
+                      ) : (
+                        <div className="font-serif text-lg text-right mb-16 mt-4 text-purple-600">
+                          {msg.content.split("<br />").map((para) => {
+                            return <p>{para}</p>;
+                          })}
+                        </div>
+                      )
+                    ) : null;
+                  })} */}
+          </div>
+          {/* {AIState === "listening" ? (
             <>
               <span className="text-purple-600 mt-2 opacity-70 flex flex-row gap-2 items-center fade-in">
                 <div class="dot dot--basic"></div>{" "}
@@ -233,10 +296,10 @@ const Chat = () => {
                 </div>
               </span>
             </>
-          ) : null}
-          <div className="flex flex-col gap-4 items-end">
+          ) : null} */}
+          {/* <div className="flex flex-col gap-4 items-end">
             <ContentEditable
-              disabled={AIState !== "editing" || isLoading} // use true to disable editing
+              disabled={AIState !== "editing"} // use true to disable editing
               onChange={(e) => {
                 setPromptText(e.target.value);
               }}
@@ -259,9 +322,10 @@ const Chat = () => {
                 Send
               </Button>
             ) : null}
-          </div>
+          </div> */}
         </div>
         <AceEditor
+          markers={markers}
           id="editor"
           mode="python"
           theme="monokai"
@@ -271,6 +335,7 @@ const Chat = () => {
           wrapEnabled={true}
           maxLines={null}
           name="editor"
+          disabled={true}
           value={data.code}
           editorProps={{ $blockScrolling: true }}
           style={{
@@ -280,8 +345,24 @@ const Chat = () => {
         />
       </div>
       <div className="flex bg-white rounded-lg drop-shadow-md h-32 p-8 w-full flex-row gap-4">
-        <input className="bg-gray-50 rounded-lg p-8 w-full outline-none text-gray-700"></input>
-        <Button>Send!</Button>
+        <input
+          disabled={AIState !== "editing"}
+          ref={mainInput}
+          onChange={(e) => {
+            setPromptText(e.target.value);
+          }}
+          value={promptText}
+          className="bg-gray-50 rounded-lg p-8 w-full outline-none text-gray-700"
+        ></input>
+        {AIState === "editing" ? (
+          <Button
+            onClick={() => {
+              onSend();
+            }}
+          >
+            Send!
+          </Button>
+        ) : null}
       </div>
     </div>
   ) : (
