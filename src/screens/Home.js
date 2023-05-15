@@ -76,7 +76,7 @@ const Home = (props) => {
     setMode(e.target.value);
   };
 
-  const [mode, setMode] = useState("essay");
+  const [mode, setMode] = useState("code");
 
   const handleSubmitCode = async () => {
     const values = codeForm.getFieldsValue(true);
@@ -119,7 +119,12 @@ const Home = (props) => {
       <p className="text-center text-lg text-gray-400">
         Evaluation through Conversation
       </p>
-      <Radio.Group onChange={handleModeChange} value={mode} className="my-8">
+      <Radio.Group
+        onChange={handleModeChange}
+        value={mode}
+        className="my-8"
+        disabled={true}
+      >
         <Radio.Button value="essay">Essay</Radio.Button>
         <Radio.Button value="code">Code</Radio.Button>
       </Radio.Group>
