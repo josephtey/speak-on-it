@@ -85,7 +85,7 @@ const Home = (props) => {
     const newDoc = await addDoc(codeRef, {
       name: values.name,
       code: values.code,
-      codeAssignment: sampleCodeAss(),
+      codeAssignment: values.codeAssignment,
       type: "code",
     });
 
@@ -180,7 +180,7 @@ const Home = (props) => {
         </div>
       ) : (
         <div className="flex flex-row gap-8 w-full px-48 py-8">
-          <p className="w-1/2 h-screen overflow-scroll">
+          {/* <p className="w-1/2 h-screen overflow-scroll">
             <h1>The Game of Nimm</h1>
             Nimm is an ancient game of strategy that is named after the old
             German word for "take." It is also called Tiouk Tiouk in West Africa
@@ -222,8 +222,8 @@ const Home = (props) => {
             asking until it is valid.
             <h2>Milestone 4</h2>
             Announce the winner.
-          </p>
-          <div className="w-1/2">
+          </p> */}
+          <div className="mb-16 flex w-full flex-col items-center">
             <Form
               form={codeForm}
               layout="vertical"
@@ -231,7 +231,7 @@ const Home = (props) => {
               onFinish={async () => {
                 await handleSubmitCode();
               }}
-              className="py-16"
+              className="py-16 w-full"
             >
               <Form.Item
                 label="What's your name?"
@@ -241,6 +241,18 @@ const Home = (props) => {
                 ]}
               >
                 <Input placeholder="e.g. Bob" />
+              </Form.Item>
+              <Form.Item
+                label="Paste your assignment here"
+                name="codeAssignment"
+                rules={[
+                  {
+                    required: true,
+                    message: "Your assignment can't be empty!",
+                  },
+                ]}
+              >
+                <TextArea showCount rows={10} />
               </Form.Item>
               <Form.Item
                 label="Paste your code here"

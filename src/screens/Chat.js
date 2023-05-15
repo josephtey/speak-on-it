@@ -156,7 +156,24 @@ const Chat = () => {
   //   };
   // }, [AIState]);
   const onSend = () => {
-    submitQuery([{ content: promptText, role: "user" }]);
+    submitQuery([
+      {
+        content:
+          promptText +
+          `\n<span>Remember, for every question you ask, if you are specifically referring to a code snippet in the student's code, output the following structure:
+    {
+      "lineNo": 10,
+      "code": "while count < 0",
+      "question": "Why did you choose to use a while loop here?"
+    }
+    @
+    <question>
+    
+    The 'question' property of the dictionary should be max. 10 words, simplified from the main question, but still refers to specific variables and function names. 
+    </span>`,
+        role: "user",
+      },
+    ]);
     setAIState("thinking");
     setDetails(null);
     setPromptText("");
@@ -234,17 +251,22 @@ const Chat = () => {
             </div>
             {AIState === "thinking" ? (
               <div className="p-4 w-1/2 fade-in fade-out text-gray-500 font-serif items-start">
-                Thinking...
+                <ReactLoading
+                  type={"bubbles"}
+                  color={"gray"}
+                  height={"20%"}
+                  width={"40%"}
+                />
               </div>
             ) : null}
             {details?.question ? (
-              <div className="bg-yellow-300 rounded-lg p-4 w-1/2 fade-in">
+              <div className="bg-yellow-300 rounded-lg p-4 fade-in text-right">
                 {details.question}
               </div>
             ) : null}
           </div>
           <div>
-            <div className="font-serif text-lg text-left" id="content">
+            <div className="font-serif text-xl text-left" id="content">
               {currentText}
             </div>
             {/* {messages.length < 1
@@ -341,28 +363,38 @@ const Chat = () => {
           style={{
             width: "50%",
           }}
+          fontSize={18}
           className="rounded-lg w-1/2"
         />
       </div>
       <div className="flex bg-white rounded-lg drop-shadow-md h-32 p-8 w-full flex-row gap-4">
-        <input
-          disabled={AIState !== "editing"}
-          ref={mainInput}
-          onChange={(e) => {
-            setPromptText(e.target.value);
+        <form
+          className="w-full flex flex-row gap-4 items-center"
+          onSubmit={(e) => {
+            e.preventDefault();
+            onSend();
           }}
-          value={promptText}
-          className="bg-gray-50 rounded-lg p-8 w-full outline-none text-gray-700"
-        ></input>
-        {AIState === "editing" ? (
-          <Button
-            onClick={() => {
-              onSend();
+        >
+          <input
+            disabled={AIState !== "editing"}
+            ref={mainInput}
+            onChange={(e) => {
+              setPromptText(e.target.value);
             }}
-          >
-            Send!
-          </Button>
-        ) : null}
+            value={promptText}
+            className="bg-gray-50 rounded-lg p-8 w-full outline-none text-gray-700"
+          ></input>
+
+          {AIState === "editing" ? (
+            <Button
+              onClick={() => {
+                onSend();
+              }}
+            >
+              Send
+            </Button>
+          ) : null}
+        </form>
       </div>
     </div>
   ) : (
