@@ -86,7 +86,7 @@ const Home = (props) => {
       name: values.name,
       code: values.code,
       codeAssignment: values.codeAssignment,
-      type: "code",
+      type: mode,
     });
 
     props.history.push("/chat/" + newDoc.id);
@@ -119,14 +119,9 @@ const Home = (props) => {
       <p className="text-center text-lg text-gray-400">
         Evaluation through Conversation
       </p>
-      <Radio.Group
-        onChange={handleModeChange}
-        value={mode}
-        className="my-8"
-        disabled={true}
-      >
-        <Radio.Button value="essay">Essay</Radio.Button>
-        <Radio.Button value="code">Code</Radio.Button>
+      <Radio.Group onChange={handleModeChange} value={mode} className="my-8">
+        <Radio.Button value="karel">Karel</Radio.Button>
+        <Radio.Button value="code">Regular</Radio.Button>
       </Radio.Group>
       {mode === "essay" ? (
         <div className="mb-16 flex w-full flex-col items-center">

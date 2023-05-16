@@ -14,6 +14,7 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-monokai";
 import textToSpeech from "../utils/elevenLabs";
+import Switch from "react-switch";
 import {
   generateEssaySystemPrompt,
   generateEssayUserPrompt,
@@ -21,6 +22,7 @@ import {
 import {
   generateCodeSystemPrompt,
   generateCodeUserPrompt,
+  generateKarelSystemPrompt,
 } from "../prompts/code";
 
 const elevenLabsAPI = process.env.REACT_APP_ELEVEN_LABS_KEY;
@@ -45,6 +47,7 @@ const Chat = () => {
     },
   });
 
+  const [voiceMode, setVoiceMode] = useState(true);
   const [details, setDetails] = useState(null);
   const [markers, setMarkers] = useState([]);
   const [promptText, setPromptText] = useState("");
@@ -98,9 +101,14 @@ const Chat = () => {
         transcript: messages,
       });
     };
-    if (mainInput.current) {
+    if (textInput.current) {
       if (!isLoading) {
-        setAIState("editing");
+        if (voiceMode) {
+          setAIState("waiting");
+        } else {
+          setAIState("editing");
+        }
+
         // console.log(allText.split("@")[1]);
         console.log("EVERYTHING: ", allText);
 
@@ -125,7 +133,6 @@ const Chat = () => {
         } catch (e) {
           console.error(e);
         }
-        mainInput.current.focus();
         // setTextToVoice(messages[messages.length - 1].content);
         update();
         // generate voices
@@ -136,25 +143,25 @@ const Chat = () => {
     }
   }, [isLoading]);
 
-  // useEffect(() => {
-  //   const keyDownHandler = (event) => {
-  //     if (event.key === "Enter") {
-  //       if (AIState === "waiting") {
-  //         startRecording();
-  //         setAIState("listening");
-  //       } else if (AIState === "listening") {
-  //         stopRecording();
-  //         setAIState("editing");
-  //       }
-  //     }
-  //   };
+  useEffect(() => {
+    const keyDownHandler = (event) => {
+      if (event.key === "Enter") {
+        if (AIState === "waiting") {
+          startRecording();
+          setAIState("listening");
+        } else if (AIState === "listening") {
+          stopRecording();
+          setAIState("editing");
+        }
+      }
+    };
 
-  //   document.addEventListener("keydown", keyDownHandler);
+    document.addEventListener("keydown", keyDownHandler);
 
-  //   return () => {
-  //     document.removeEventListener("keydown", keyDownHandler);
-  //   };
-  // }, [AIState]);
+    return () => {
+      document.removeEventListener("keydown", keyDownHandler);
+    };
+  }, [AIState]);
   const onSend = () => {
     submitQuery([
       {
@@ -185,6 +192,14 @@ const Chat = () => {
         submitQuery([
           {
             content: generateCodeSystemPrompt(data.codeAssignment, data.name),
+            role: "system",
+          },
+          { content: generateCodeUserPrompt(data.code), role: "user" },
+        ]);
+      } else if (data.type === "karel") {
+        submitQuery([
+          {
+            content: generateKarelSystemPrompt(data.codeAssignment, data.name),
             role: "system",
           },
           { content: generateCodeUserPrompt(data.code), role: "user" },
@@ -223,6 +238,16 @@ const Chat = () => {
 
   return data ? (
     <div className="flex flex-col gap-4 items-center pt-48 w-full px-48">
+      <div className="bg-white rounded-lg drop-shadow-md p-4 self-end flex gap-4 items-center px-8">
+        <span className="text-gray-400">Voice Mode</span>
+        <Switch
+          onChange={(checked) => {
+            setVoiceMode(checked);
+          }}
+          disabled={AIState === "waiting" || AIState === "listening"}
+          checked={voiceMode}
+        />
+      </div>
       <div className="flex flex-row gap-4 justify-center w-full">
         <div className="flex w-1/2 pt-8 flex-wrap flex-col relative bg-white rounded-lg drop-shadow-md px-8">
           <div className="flex flex-row justify-between items-center w-full">
@@ -230,17 +255,6 @@ const Chat = () => {
               <span
                 className={`text-center text-gray-600 fade-in mb-4 font-serif text-md`}
               >
-                {/* <AudioStream
-                    voiceId={"21m00Tcm4TlvDq8ikWAM"}
-                    text={textToVoice}
-                    apiKey={elevenLabsAPI}
-                    voiceSettings={{
-                      stability: 0.75,
-                      similarity_boost: 0.6,
-                    }}
-                    className="text-gray-100"
-                    triggerVariable={{ isLoading }}
-                  /> */}
                 <b>Liz</b>
               </span>
               {AIState === "thinking" ? (
@@ -290,9 +304,9 @@ const Chat = () => {
                     ) : null;
                   })} */}
           </div>
-          {/* {AIState === "listening" ? (
+          {AIState === "listening" ? (
             <>
-              <span className="text-purple-600 mt-2 opacity-70 flex flex-row gap-2 items-center fade-in">
+              <span className="text-purple-600 mt-2 text-gray-400 flex flex-row gap-2 items-center fade-in">
                 <div class="dot dot--basic"></div>{" "}
                 <div>
                   Liz is now <b>listening...</b> start speaking! Press 'enter'
@@ -302,23 +316,23 @@ const Chat = () => {
             </>
           ) : AIState === "waiting" ? (
             <>
-              <span className="text-gray-600 mt-2 opacity-70 flex flex-row gap-2 items-center fade-in">
+              <span className="text-gray-600 mt-2 text-gray-400 flex flex-row gap-2 items-center fade-in">
                 <div>
                   Take a few seconds to understand the question. Press{" "}
                   <b>enter</b> when you're ready to start speaking.
                 </div>
               </span>
             </>
-          ) : AIState === "editing" ? (
+          ) : AIState === "editing" && voiceMode ? (
             <>
-              <span className="text-gray-600 mt-2 opacity-70 flex flex-row gap-2 items-center fade-in">
+              <span className="text-gray-600 mt-2 text-gray-400 flex flex-row gap-2 items-center fade-in">
                 <div>
                   If we transcribed your answer inaccurately, feel free to{" "}
                   <b>edit</b> it before clicking send.
                 </div>
               </span>
             </>
-          ) : null} */}
+          ) : null}
           {/* <div className="flex flex-col gap-4 items-end">
             <ContentEditable
               disabled={AIState !== "editing"} // use true to disable editing
@@ -367,25 +381,28 @@ const Chat = () => {
           className="rounded-lg w-1/2"
         />
       </div>
-      <div className="flex bg-white rounded-lg drop-shadow-md h-32 p-8 w-full flex-row gap-4">
+      <div className="flex bg-white rounded-lg drop-shadow-md p-8 w-full flex-row gap-4">
         <form
-          className="w-full flex flex-row gap-4 items-center"
+          className="w-full flex flex-row gap-4 items-start"
           onSubmit={(e) => {
             e.preventDefault();
             onSend();
           }}
         >
-          <input
-            disabled={AIState !== "editing"}
-            ref={mainInput}
+          <ContentEditable
+            disabled={AIState !== "editing"} // use true to disable editing
             onChange={(e) => {
               setPromptText(e.target.value);
             }}
-            value={promptText}
+            style={{
+              minHeight: "88px",
+            }}
+            ref={textInput}
             className="bg-gray-50 rounded-lg p-8 w-full outline-none text-gray-700"
-          ></input>
+            html={promptText ? promptText : null}
+          />
 
-          {AIState === "editing" ? (
+          {AIState === "editing" && !transcribing && !recording && !speaking ? (
             <Button
               onClick={() => {
                 onSend();
