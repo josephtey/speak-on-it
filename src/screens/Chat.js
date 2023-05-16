@@ -24,6 +24,7 @@ import {
   generateCodeUserPrompt,
   generateKarelSystemPrompt,
 } from "../prompts/code";
+import { constructingTranscript } from "../utils/general";
 
 const elevenLabsAPI = process.env.REACT_APP_ELEVEN_LABS_KEY;
 const secretKey = process.env.REACT_APP_OPENAI_API_KEY;
@@ -62,7 +63,6 @@ const Chat = () => {
   const [allText, setAllText] = useState("");
   const [textToVoice, setTextToVoice] = useState("");
   const textInput = useRef();
-  const mainInput = useRef();
 
   const [data, setData] = useState();
   useEffect(() => {
@@ -97,9 +97,11 @@ const Chat = () => {
     const update = async () => {
       const essaysRef = doc(db, "assns", id);
 
-      await updateDoc(essaysRef, {
-        transcript: messages,
-      });
+      // const trans = constructingTranscript(messages);
+      // console.log(trans);
+      // await updateDoc(essaysRef, {
+      //   transcript: trans,
+      // });
     };
     if (textInput.current) {
       if (!isLoading) {
@@ -167,17 +169,20 @@ const Chat = () => {
       {
         content:
           promptText +
-          `\n<span>Remember, for every question you ask, if you are specifically referring to a code snippet in the student's code, output the following structure:
-    {
-      "lineNo": 10,
-      "code": "while count < 0",
-      "question": "Why did you choose to use a while loop here?"
-    }
-    @
-    <question>
-    
-    The 'question' property of the dictionary should be max. 10 words, simplified from the main question, but still refers to specific variables and function names. 
-    </span>`,
+          `\n<span>
+          Remember, for every question you ask, if you are specifically referring to a code snippet in the student's code, output the following structure:
+          {
+            "type": "followupTwo",
+            "lineNo": 10,
+            "code": "while count < 0",
+            "question": "What would happen if you implemented a for loop?"
+            "currentScore": 4,
+          }
+          @
+          <question>
+          
+          You must remember to include the '@' delimiter.
+          </span>`,
         role: "user",
       },
     ]);
@@ -267,9 +272,9 @@ const Chat = () => {
               <div className="p-4 w-1/2 fade-in fade-out text-gray-500 font-serif items-start">
                 <ReactLoading
                   type={"bubbles"}
-                  color={"gray"}
-                  height={"20%"}
-                  width={"40%"}
+                  color={"purple"}
+                  height={"5%"}
+                  width={"20%"}
                 />
               </div>
             ) : null}

@@ -70,6 +70,7 @@ const Evaluate = () => {
   const [data, setData] = useState(null);
   const [evaluation, setEvaluation] = useState(null);
   const [cleanedTranscript, setCleanedTranscript] = useState("");
+  const [transcriptArr, setTranscriptArr] = useState([]);
   const [isEvaluating, setIsEvaluating] = useState(false);
 
   useEffect(() => {
@@ -83,12 +84,11 @@ const Evaluate = () => {
           content: item.content,
         };
       });
-
+      setTranscriptArr(c_transcript);
       let m_transcript = "";
       for (let i = 2; i < c_transcript.length; i++) {
         m_transcript += `${c_transcript[i].role}: ${c_transcript[i].content}\n`;
       }
-      console.log(m_transcript);
 
       if (docSnap.data().evaluation) {
         setEvaluation(docSnap.data().evaluation);
@@ -123,9 +123,44 @@ const Evaluate = () => {
     }
   }, [cleanedTranscript, data]);
 
-  return evaluation ? (
-    <div className="flex justify-center content-center w-full py-24">
-      <div className="w-9/12 justify-center content-center flex flex-col gap-8">
+  return evaluation && transcriptArr ? (
+    <div className="flex justify-center content-center w-full py-24 px-48">
+      <div className="rounded-lg bg-white drop-shadow-md p-8 w-full">
+        <div className="rounded-lg p-8 bg-gray-50 w-full flex flex-col gap-8 h-[800px] rounded-lg overflow-scroll">
+          {transcriptArr.map((message, i) => {
+            return i > 1 ? (
+              <div
+                className={`text-white ${
+                  message.role !== "Liz"
+                    ? "bg-blue-500 self-end"
+                    : "bg-gray-500 self-start"
+                } text-md w-2/3 p-3 rounded-lg`}
+              >
+                {message.content}
+              </div>
+            ) : null;
+          })}
+        </div>
+      </div>
+    </div>
+  ) : isEvaluating ? (
+    <div className="flex flex-row items-center justify-center w-full h-screen">
+      <ReactLoading
+        className="mr-2"
+        type={"spin"}
+        color={"black"}
+        height={30}
+        width={30}
+      />{" "}
+    </div>
+  ) : null;
+};
+
+export default Evaluate;
+
+// old
+{
+  /* <div className="w-9/12 justify-center content-center flex flex-col gap-8">
         <div className="text-2xl mb-16">
           <span className="text-3xl">
             <b>
@@ -167,19 +202,5 @@ const Evaluate = () => {
             </div>
           );
         })}
-      </div>
-    </div>
-  ) : isEvaluating ? (
-    <div className="flex flex-row items-center justify-center w-full h-screen">
-      <ReactLoading
-        className="mr-2"
-        type={"spin"}
-        color={"black"}
-        height={30}
-        width={30}
-      />{" "}
-    </div>
-  ) : null;
-};
-
-export default Evaluate;
+      </div> */
+}
