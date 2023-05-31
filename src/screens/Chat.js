@@ -78,7 +78,7 @@ const Chat = () => {
   const [messages, submitQuery] = useChatCompletion({
     model: GPT4.BASE,
     apiKey: secretKey,
-    temperature: 0.9,
+    temperature: 0,
   });
 
   useEffect(() => {
@@ -172,16 +172,15 @@ const Chat = () => {
           `\n<span>
           Remember, for every question you ask, if you are specifically referring to a code snippet in the student's code, output the following structure:
           {
-            "type": "followupTwo",
+            "type": "baseQuestion",
             "lineNo": 10,
             "code": "while count < 0",
             "question": "What would happen if you implemented a for loop?"
-            "currentScore": 4,
           }
           @
           <question>
           
-          You must remember to include the '@' delimiter.
+          You must remember to include the '@' delimiter. The question should also include a friendly response to the studen's previous answer.
           </span>`,
         role: "user",
       },
@@ -279,7 +278,7 @@ const Chat = () => {
               </div>
             ) : null}
             {details?.question ? (
-              <div className="bg-yellow-300 rounded-lg p-4 fade-in text-right">
+              <div className="bg-yellow-300 rounded-lg p-4 fade-in w-1/2 text-right">
                 {details.question}
               </div>
             ) : null}
