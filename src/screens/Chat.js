@@ -76,10 +76,18 @@ const Chat = () => {
   }, []);
 
   const [messages, submitQuery] = useChatCompletion({
-    model: GPT4.BASE,
+    model: GPT35.TURBO,
     apiKey: secretKey,
     temperature: 0,
   });
+
+  const update = async () => {
+    const essaysRef = doc(db, "assns", id);
+
+    await updateDoc(essaysRef, {
+      transcript: messages,
+    });
+  };
 
   useEffect(() => {
     if (messages?.length > 1) {
@@ -96,20 +104,12 @@ const Chat = () => {
           setCurrentText(messages[messages.length - 1].content);
         }
       }
+      update();
     }
   }, [messages]);
 
   const isLoading = messages[messages.length - 1]?.meta?.loading; //GPT loading
   useEffect(() => {
-    const update = async () => {
-      const essaysRef = doc(db, "assns", id);
-
-      // const trans = constructingTranscript(messages);
-      // console.log(trans);
-      // await updateDoc(essaysRef, {
-      //   transcript: trans,
-      // });
-    };
     if (textInput.current) {
       if (!isLoading) {
         if (voiceMode) {
@@ -118,32 +118,33 @@ const Chat = () => {
           setAIState("editing");
         }
 
-        // console.log(allText.split("@")[1]);
-        console.log("EVERYTHING: ", allText);
+        if (data.type === "code" || data.type === "karel") {
+          // console.log(allText.split("@")[1]);
+          console.log("EVERYTHING: ", allText);
 
-        try {
-          const details = JSON.parse(
-            allText.split("@")[0].replaceAll("\n", "").trim()
-          );
-          setDetails(details);
-          console.log("DETAILS: ", details);
-          if (details.type !== "none") {
-            setMarkers([
-              {
-                startRow: details.lineNo - 1,
-                startCol: 1,
-                endRow: details.lineNo - 1,
-                endCol: 10,
-                className: "marker-yellow",
-                type: "fullLine",
-              },
-            ]);
+          try {
+            const details = JSON.parse(
+              allText.split("@")[0].replaceAll("\n", "").trim()
+            );
+            setDetails(details);
+            console.log("DETAILS: ", details);
+            if (details.type !== "none") {
+              setMarkers([
+                {
+                  startRow: details.lineNo - 1,
+                  startCol: 1,
+                  endRow: details.lineNo - 1,
+                  endCol: 10,
+                  className: "marker-yellow",
+                  type: "fullLine",
+                },
+              ]);
+            }
+          } catch (e) {
+            console.error(e);
           }
-        } catch (e) {
-          console.error(e);
         }
         // setTextToVoice(messages[messages.length - 1].content);
-        update();
         // generate voices
         // show the animation of streaming ...
         // setIsListening(true);
@@ -171,6 +172,7 @@ const Chat = () => {
       document.removeEventListener("keydown", keyDownHandler);
     };
   }, [AIState]);
+
   const onSend = () => {
     if (data.type === "code" || data.type === "karel") {
       submitQuery([
@@ -196,7 +198,6 @@ const Chat = () => {
     } else if (data.type === "essay") {
       submitQuery([{ content: promptText, role: "user" }]);
     }
-
     setAIState("thinking");
     setDetails(null);
     setPromptText("");
@@ -221,13 +222,23 @@ const Chat = () => {
           { content: generateCodeUserPrompt(data.code), role: "user" },
         ]);
       } else if (data.type === "essay") {
-        submitQuery([
-          {
-            content: generateEssaySystemPrompt(data.essayPrompt, data.name),
-            role: "system",
-          },
-          { content: generateEssayUserPrompt(data.essay), role: "user" },
-        ]);
+        if (data.transcript) {
+          if (
+            data.transcript[data.transcript.length - 1].role === "assistant"
+          ) {
+            submitQuery(data.transcript.slice(0, -1));
+          } else {
+            submitQuery(data.transcript);
+          }
+        } else {
+          submitQuery([
+            {
+              content: generateEssaySystemPrompt(data.essayPrompt, data.name),
+              role: "system",
+            },
+            { content: generateEssayUserPrompt(data.essay), role: "user" },
+          ]);
+        }
       }
     }
   }, [data]);

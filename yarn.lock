@@ -7639,7 +7639,7 @@ open@^8.0.9, open@^8.4.0:
     is-docker "^2.1.1"
     is-wsl "^2.2.0"
 
-openai-streaming-hooks@^1.0.4:
+openai-streaming-hooks@1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/openai-streaming-hooks/-/openai-streaming-hooks-1.0.4.tgz#98ea06bcc8d7b041d1be887f3a49de336c968d3c"
   integrity sha512-+Dnj0z+kmDgjn3lj/IN5jUQAtny6MHUTvSrBMDYf7woW/stB4zdGo9o633dvaxKTYfWvAqw0mHxx+CGfPKtydg==
