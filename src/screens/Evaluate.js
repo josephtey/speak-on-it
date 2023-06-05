@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { ChatOpenAI } from "langchain/chat_models";
 import ReactLoading from "react-loading";
 import { HumanChatMessage, SystemChatMessage } from "langchain/schema";
+import { FaArrowRight } from "react-icons/fa";
 import { updateDoc } from "firebase/firestore";
 import {
   generateEssayEvaluationPrompt,
@@ -144,28 +145,35 @@ const Evaluate = () => {
       <div className="flex flex-row gap-8 justify-start px-36 content-center w-full overflow-x-scroll pb-36">
         {evalStory.map((combo, i) => {
           return (
-            <div className="flex flex-col gap-8">
-              {combo.content.map((qa) => {
-                return (
-                  <div className="rounded-lg bg-white drop-shadow-md p-8 w-96 h-96 text-xl">
-                    <div className="w-full p-4 h-full rounded-lg overflow-scroll flex flex-col gap-2">
-                      {qa.type === "baseQuestion" || qa.type === "none" ? (
-                        <span className="text-slate-400 capitalize text-2xl">
-                          Question {i + 1}
-                        </span>
-                      ) : (qa.type === "followupOne") |
-                        (qa.type === "followupTwo") ? (
-                        <span className="text-slate-400 capitalize text-xl">
-                          Follow Up
-                        </span>
-                      ) : null}
-                      <b>{qa.question}</b>
-                      <p>{qa.answer}</p>
+            <>
+              <div className="flex flex-col gap-8">
+                {combo.content.map((qa) => {
+                  return (
+                    <div className="rounded-lg bg-white drop-shadow-md p-8 w-[500px] h-96 text-xl">
+                      <div className="w-full p-4 h-full rounded-lg overflow-scroll flex flex-col gap-2">
+                        {qa.type === "baseQuestion" || qa.type === "none" ? (
+                          <span className="text-slate-400 capitalize text-2xl">
+                            Question {i + 1}
+                          </span>
+                        ) : (qa.type === "followupOne") |
+                          (qa.type === "followupTwo") ? (
+                          <span className="text-slate-400 capitalize text-xl">
+                            Follow Up
+                          </span>
+                        ) : null}
+                        <b>{qa.question}</b>
+                        <p>{qa.answer}</p>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+              {i !== evalStory.length - 1 ? (
+                <div className="mt-[170px]">
+                  <FaArrowRight size={36} />
+                </div>
+              ) : null}
+            </>
           );
         })}
       </div>
