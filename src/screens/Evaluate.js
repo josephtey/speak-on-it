@@ -68,8 +68,8 @@ const Evaluate = () => {
   const { id } = useParams();
 
   const [data, setData] = useState(null);
+  const [evalStory, setEvalStory] = useState([]);
   const [evaluation, setEvaluation] = useState(null);
-  const [cleanedTranscript, setCleanedTranscript] = useState("");
   const [transcriptArr, setTranscriptArr] = useState([]);
   const [isEvaluating, setIsEvaluating] = useState(false);
 
@@ -77,72 +77,99 @@ const Evaluate = () => {
     const fetchTranscript = async () => {
       const docRef = doc(db, "assns", id);
       const docSnap = await getDoc(docRef);
-      setData(docSnap.data());
-      const c_transcript = docSnap.data().transcript.map((item) => {
-        return {
-          role: item.role === "assistant" ? "Liz" : "user" ? "Joe" : "",
-          content: item.content,
-        };
-      });
-      setTranscriptArr(c_transcript);
-      let m_transcript = "";
-      for (let i = 2; i < c_transcript.length; i++) {
-        m_transcript += `${c_transcript[i].role}: ${c_transcript[i].content}\n`;
+      const d = docSnap.data();
+      setData(d);
+
+      const evalStory = [];
+      for (let i = 2; i < d.transcript.length; i += 2) {
+        if (d.transcript[i + 1]) {
+          const questionDetails = JSON.parse(
+            d.transcript[i].content.split("@")[0].replaceAll("\n", "").trim()
+          );
+
+          const answer = d.transcript[i + 1].content
+            .split("<span>")[0]
+            .replaceAll("\n", "")
+            .trim();
+
+          evalStory.push({
+            question: questionDetails?.question
+              ? questionDetails.question
+              : i === 2
+              ? "Did you find anything particularly challenging or discover something new?"
+              : "",
+            answer,
+            type: questionDetails?.type,
+          });
+        }
+      }
+      evalStory.reverse();
+
+      const ultimateEvalStory = [];
+
+      let combo = null;
+      while (evalStory.length > 0) {
+        combo = evalStory.pop();
+
+        if (combo.type === "none") {
+          ultimateEvalStory.push({
+            type: "intro",
+            content: [combo],
+          });
+        } else if (combo.type === "baseQuestion") {
+          let followUpOne = evalStory.pop();
+          let followUpTwo = evalStory.pop();
+          let newContent = [combo, followUpOne, followUpTwo];
+
+          ultimateEvalStory.push({
+            type: "baseCollection",
+            content: newContent,
+          });
+        }
       }
 
-      if (docSnap.data().evaluation) {
-        setEvaluation(docSnap.data().evaluation);
-      }
-      setCleanedTranscript(m_transcript);
+      console.log(ultimateEvalStory);
+
+      setEvalStory(ultimateEvalStory);
     };
 
     fetchTranscript();
   }, []);
 
-  useEffect(() => {
-    const evaluate = async () => {
-      setIsEvaluating(true);
-      const results = await evaluateTranscript(
-        cleanedTranscript,
-        data.name,
-        data.type
-      );
-      const parsedResults = JSON.parse(results.replaceAll("\n", "").trim());
-      const essaysRef = doc(db, "assns", id);
-
-      await updateDoc(essaysRef, {
-        evaluation: parsedResults,
-      });
-
-      setIsEvaluating(false);
-
-      setEvaluation(parsedResults);
-    };
-    if (!data?.evaluation && data?.name && cleanedTranscript) {
-      evaluate();
-    }
-  }, [cleanedTranscript, data]);
-
-  return evaluation && transcriptArr ? (
-    <div className="flex justify-center content-center w-full py-24 px-48">
-      <div className="rounded-lg bg-white drop-shadow-md p-8 w-full">
-        <div className="rounded-lg p-8 bg-gray-50 w-full flex flex-col gap-8 h-[800px] rounded-lg overflow-scroll">
-          {transcriptArr.map((message, i) => {
-            return i > 1 ? (
-              <div
-                className={`text-white ${
-                  message.role !== "Liz"
-                    ? "bg-blue-500 self-end"
-                    : "bg-gray-500 self-start"
-                } text-md w-2/3 p-3 rounded-lg`}
-              >
-                {message.content}
-              </div>
-            ) : null;
-          })}
-        </div>
+  return evalStory ? (
+    <>
+      <div className="px-36 pt-36 pb-8">
+        <span className="text-4xl font-bold">Transcript Breakdown</span>
       </div>
-    </div>
+      <div className="flex flex-row gap-8 justify-start px-36 content-center w-full overflow-x-scroll pb-36">
+        {evalStory.map((combo, i) => {
+          return (
+            <div className="flex flex-col gap-8">
+              {combo.content.map((qa) => {
+                return (
+                  <div className="rounded-lg bg-white drop-shadow-md p-8 w-96 h-96 text-xl">
+                    <div className="w-full p-4 h-full rounded-lg overflow-scroll flex flex-col gap-2">
+                      {qa.type === "baseQuestion" || qa.type === "none" ? (
+                        <span className="text-slate-400 capitalize text-2xl">
+                          Question {i + 1}
+                        </span>
+                      ) : (qa.type === "followupOne") |
+                        (qa.type === "followupTwo") ? (
+                        <span className="text-slate-400 capitalize text-xl">
+                          Follow Up
+                        </span>
+                      ) : null}
+                      <b>{qa.question}</b>
+                      <p>{qa.answer}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </>
   ) : isEvaluating ? (
     <div className="flex flex-row items-center justify-center w-full h-screen">
       <ReactLoading
@@ -204,3 +231,26 @@ export default Evaluate;
         })}
       </div> */
 }
+
+// v2
+// return evaluation && transcriptArr ? (
+//   <div className="flex justify-center content-center w-full py-24 px-48">
+//     <div className="rounded-lg bg-white drop-shadow-md p-8 w-full">
+//       <div className="rounded-lg p-8 bg-gray-50 w-full flex flex-col gap-8 h-[800px] rounded-lg overflow-scroll">
+//         {transcriptArr.map((message, i) => {
+//           return i > 1 ? (
+//             <div
+//               className={`text-white ${
+//                 message.role !== "Liz"
+//                   ? "bg-blue-500 self-end"
+//                   : "bg-gray-500 self-start"
+//               } text-md w-2/3 p-3 rounded-lg`}
+//             >
+//               {message.content}
+//             </div>
+//           ) : null;
+//         })}
+//       </div>
+//     </div>
+//   </div>
+// )
