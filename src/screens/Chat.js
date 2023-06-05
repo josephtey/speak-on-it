@@ -205,32 +205,33 @@ const Chat = () => {
 
   useEffect(() => {
     if (data) {
-      if (data.type === "code") {
-        submitQuery([
-          {
-            content: generateCodeSystemPrompt(data.codeAssignment, data.name),
-            role: "system",
-          },
-          { content: generateCodeUserPrompt(data.code), role: "user" },
-        ]);
-      } else if (data.type === "karel") {
-        submitQuery([
-          {
-            content: generateKarelSystemPrompt(data.codeAssignment, data.name),
-            role: "system",
-          },
-          { content: generateCodeUserPrompt(data.code), role: "user" },
-        ]);
-      } else if (data.type === "essay") {
-        if (data.transcript) {
-          if (
-            data.transcript[data.transcript.length - 1].role === "assistant"
-          ) {
-            submitQuery(data.transcript.slice(0, -1));
-          } else {
-            submitQuery(data.transcript);
-          }
+      if (data.transcript) {
+        if (data.transcript[data.transcript.length - 1].role === "assistant") {
+          submitQuery(data.transcript.slice(0, -1));
         } else {
+          submitQuery(data.transcript);
+        }
+      } else {
+        if (data.type === "code") {
+          submitQuery([
+            {
+              content: generateCodeSystemPrompt(data.codeAssignment, data.name),
+              role: "system",
+            },
+            { content: generateCodeUserPrompt(data.code), role: "user" },
+          ]);
+        } else if (data.type === "karel") {
+          submitQuery([
+            {
+              content: generateKarelSystemPrompt(
+                data.codeAssignment,
+                data.name
+              ),
+              role: "system",
+            },
+            { content: generateCodeUserPrompt(data.code), role: "user" },
+          ]);
+        } else if (data.type === "essay") {
           submitQuery([
             {
               content: generateEssaySystemPrompt(data.essayPrompt, data.name),
