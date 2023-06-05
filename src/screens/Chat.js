@@ -76,7 +76,7 @@ const Chat = () => {
   }, []);
 
   const [messages, submitQuery] = useChatCompletion({
-    model: GPT35.TURBO,
+    model: GPT4.BASE,
     apiKey: secretKey,
     temperature: 0,
   });
@@ -91,7 +91,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (messages?.length > 1) {
-      if (data.mode === "code" || data.mode === "karel") {
+      if (data.type === "code" || data.type === "karel") {
         if (messages[messages.length - 1].content.includes("@")) {
           setAIState("speaking");
           setCurrentText(messages[messages.length - 1].content.split("@")[1]);
