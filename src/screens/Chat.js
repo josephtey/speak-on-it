@@ -83,11 +83,18 @@ const Chat = () => {
 
   useEffect(() => {
     if (messages?.length > 1) {
-      if (messages[messages.length - 1].content.includes("@")) {
-        setAIState("speaking");
-        setCurrentText(messages[messages.length - 1].content.split("@")[1]);
+      if (data.mode === "code" || data.mode === "karel") {
+        if (messages[messages.length - 1].content.includes("@")) {
+          setAIState("speaking");
+          setCurrentText(messages[messages.length - 1].content.split("@")[1]);
+        } else {
+          setAllText(messages[messages.length - 1].content);
+        }
       } else {
-        setAllText(messages[messages.length - 1].content);
+        if (messages[messages.length - 1].content) {
+          setAIState("speaking");
+          setCurrentText(messages[messages.length - 1].content);
+        }
       }
     }
   }, [messages]);
@@ -165,26 +172,31 @@ const Chat = () => {
     };
   }, [AIState]);
   const onSend = () => {
-    submitQuery([
-      {
-        content:
-          promptText +
-          `\n<span>
-          Remember, for every question you ask, if you are specifically referring to a code snippet in the student's code, output the following structure:
-          {
-            "type": "baseQuestion",
-            "lineNo": 10,
-            "code": "while count < 0",
-            "question": "What would happen if you implemented a for loop?"
-          }
-          @
-          <question>
-          
-          You must remember to include the '@' delimiter. The question should also include a friendly response to the studen's previous answer.
-          </span>`,
-        role: "user",
-      },
-    ]);
+    if (data.type === "code" || data.type === "karel") {
+      submitQuery([
+        {
+          content:
+            promptText +
+            `\n<span>
+            Remember, for every question you ask, if you are specifically referring to a code snippet in the student's code, output the following structure:
+            {
+              "type": "baseQuestion",
+              "lineNo": 10,
+              "code": "while count < 0",
+              "question": "What would happen if you implemented a for loop?"
+            }
+            @
+            <question>
+            
+            You must remember to include the '@' delimiter. The question should also include a friendly response to the studen's previous answer.
+            </span>`,
+          role: "user",
+        },
+      ]);
+    } else if (data.type === "essay") {
+      submitQuery([{ content: promptText, role: "user" }]);
+    }
+
     setAIState("thinking");
     setDetails(null);
     setPromptText("");
@@ -208,7 +220,7 @@ const Chat = () => {
           },
           { content: generateCodeUserPrompt(data.code), role: "user" },
         ]);
-      } else {
+      } else if (data.type === "essay") {
         submitQuery([
           {
             content: generateEssaySystemPrompt(data.essayPrompt, data.name),
@@ -364,26 +376,39 @@ const Chat = () => {
             ) : null}
           </div> */}
         </div>
-        <AceEditor
-          markers={markers}
-          id="editor"
-          mode="python"
-          theme="monokai"
-          onChange={() => {}}
-          highlightActiveLine={false}
-          showGutter={true}
-          wrapEnabled={true}
-          maxLines={null}
-          name="editor"
-          disabled={true}
-          value={data.code}
-          editorProps={{ $blockScrolling: true }}
-          style={{
-            width: "50%",
-          }}
-          fontSize={18}
-          className="rounded-lg w-1/2"
-        />
+        {data.type === "karel" || data.type === "code" ? (
+          <AceEditor
+            markers={markers}
+            id="editor"
+            mode="python"
+            theme="monokai"
+            onChange={() => {}}
+            highlightActiveLine={false}
+            showGutter={true}
+            wrapEnabled={true}
+            maxLines={null}
+            name="editor"
+            disabled={true}
+            value={data.code}
+            editorProps={{ $blockScrolling: true }}
+            style={{
+              width: "50%",
+            }}
+            fontSize={18}
+            className="rounded-lg w-1/2"
+          />
+        ) : data.type === "essay" ? (
+          <div className="w-1/2 elative bg-[#fffaed] h-[600px] rounded-lg drop-shadow-md px-8 overflow-scroll">
+            <h2 className="text-[#725424] font-serif font-bold">
+              For reference, here is your essay.{" "}
+            </h2>
+            <div className="text-[#725424] font-serif pt-8 r">
+              {data.essay.split("\n").map((para) => {
+                return <p className="mb-4">{para}</p>;
+              })}
+            </div>
+          </div>
+        ) : null}
       </div>
       <div className="flex bg-white rounded-lg drop-shadow-md p-8 w-full flex-row gap-4">
         <form

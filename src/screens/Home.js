@@ -120,8 +120,9 @@ const Home = (props) => {
         Evaluation through Conversation
       </p>
       <Radio.Group onChange={handleModeChange} value={mode} className="my-8">
-        <Radio.Button value="karel">Karel</Radio.Button>
-        <Radio.Button value="code">Regular</Radio.Button>
+        <Radio.Button value="karel">Code (Karel)</Radio.Button>
+        <Radio.Button value="code">Code (Regular)</Radio.Button>
+        <Radio.Button value="essay">Essay</Radio.Button>
       </Radio.Group>
       {mode === "essay" ? (
         <div className="mb-16 flex w-full flex-col items-center">
@@ -179,7 +180,7 @@ const Home = (props) => {
           </div>
         </div>
       ) : (
-        <div className="flex flex-row gap-8 w-full px-48 py-8">
+        <div className="flex flex-row gap-8 w-full py-8">
           {/* <p className="w-1/2 h-screen overflow-scroll">
             <h1>The Game of Nimm</h1>
             Nimm is an ancient game of strategy that is named after the old
@@ -231,7 +232,7 @@ const Home = (props) => {
               onFinish={async () => {
                 await handleSubmitCode();
               }}
-              className="py-16 w-full"
+              className="py-16 w-1/2"
             >
               <Form.Item
                 label="What's your name?"
