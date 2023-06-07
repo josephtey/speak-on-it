@@ -122,7 +122,7 @@ const Home = (props) => {
               <div className="w-full min-h-fit">
                 <img src={Liz} className="rounded-lg w-36 mb-8" />
                 <p>Yay! We hope you're just as excited as we are!</p> <br />
-                <p>Meet Liz, your AI 'pal for this experience.</p>
+                <p>Meet Liz, your AI guide for this experience.</p>
                 <br />
                 <p>
                   For context, we are Joe & Shaurya, two undergraduate

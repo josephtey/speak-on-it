@@ -181,6 +181,9 @@ const Chat = () => {
               setAIState("closure");
             }
           } catch (e) {
+            alert(
+              "Error. Please refresh the page. If this doesn't work, try again!"
+            );
             console.error(e);
           }
         }
@@ -447,9 +450,8 @@ const Chat = () => {
                   type="dashed"
                   className="self-start"
                   onClick={() => {
-                    alert(
-                      "Thanks for participating! You can close this tab now."
-                    );
+                    window.location.href =
+                      "https://forms.gle/QZaAAWbfbc793vE66";
                   }}
                 >
                   Finish
