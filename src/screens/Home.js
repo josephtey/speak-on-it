@@ -60,12 +60,12 @@ const Home = (props) => {
   const [showError, setShowError] = useState(false);
 
   return (
-    <div className="flex w-full items-center h-screen flex-wrap flex-col flex-nowrap">
+    <div className="flex w-full items-center h-screen flex-wrap flex-col flex-nowrap lg:p-48">
       <div className="flex flex-col gap-8 w-full py-8 items-center justify-center">
-        <div className="mb-16 flex flex-col items-center my-48 w-1/2 text-xl bg-white rounded-lg shadow-md p-8">
+        <div className="mb-16 flex flex-col items-center text-xl bg-white rounded-lg shadow-md p-8 w-full">
           {step === 1 ? (
             <>
-              <div className="w-full h-[600px]">
+              <div className="w-full min-h-fit">
                 <p>
                   Hello! We hoped you enjoyed <b>Code in Place 2023!</b>
                 </p>{" "}
@@ -106,7 +106,7 @@ const Home = (props) => {
                 <br />
                 <p>Do you want to take part in this experience?</p>
               </div>
-              <div className="flex flex-row justify-end w-full">
+              <div className="flex flex-row justify-end w-full mt-16">
                 <div
                   className="rounded-lg text-white bg-blue-500 hover:bg-blue-600 cursor-pointer px-8 py-4 font-bold w-54 text-center self-end mb-4"
                   onClick={() => {
@@ -119,7 +119,7 @@ const Home = (props) => {
             </>
           ) : step === 2 ? (
             <>
-              <div className="w-full h-[600px]">
+              <div className="w-full min-h-fit">
                 <img src={Liz} className="rounded-lg w-36 mb-8" />
                 <p>Yay! We hope you're just as excited as we are!</p> <br />
                 <p>Meet Liz, your AI 'pal for this experience.</p>
@@ -136,7 +136,7 @@ const Home = (props) => {
                   As such, please remember that this is an experimental tool!
                 </p>
               </div>
-              <div className="flex flex-row justify-between w-full">
+              <div className="flex flex-row justify-between w-full mt-16">
                 <div
                   className="rounded-lg text-blue-500 bg-white border-2 border-blue-500 hover:bg-gray-100 cursor-pointer px-8 py-4 font-bold w-54 text-center self-end mb-4"
                   onClick={() => {
@@ -161,7 +161,7 @@ const Home = (props) => {
                 form={basicInfoForm}
                 layout="vertical"
                 autoComplete="off"
-                className="w-full h-[600px]"
+                className="w-full min-h-fit"
                 size={"large"}
               >
                 <Form.Item
@@ -251,7 +251,7 @@ const Home = (props) => {
                 onFinish={async () => {
                   await handleSubmitCode();
                 }}
-                className="w-full h-[600px]"
+                className="w-full min-h-fit"
                 size={"large"}
               >
                 <Form.Item

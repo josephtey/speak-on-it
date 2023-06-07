@@ -144,6 +144,12 @@ const Chat = () => {
           assn.type === "karel" ||
           assn.type === "graphics"
         ) {
+          if (voiceMode) {
+            setAIState("waiting");
+          } else {
+            setAIState("editing");
+          }
+
           // console.log(allText.split("@")[1]);
           console.log("EVERYTHING: ", allText);
 
@@ -173,21 +179,9 @@ const Chat = () => {
             }
             if (details.type === "closure") {
               setAIState("closure");
-            } else {
-              if (voiceMode) {
-                setAIState("waiting");
-              } else {
-                setAIState("editing");
-              }
             }
           } catch (e) {
             console.error(e);
-          }
-        } else {
-          if (voiceMode) {
-            setAIState("waiting");
-          } else {
-            setAIState("editing");
           }
         }
         // setTextToVoice(messages[messages.length - 1].content);
@@ -271,18 +265,24 @@ const Chat = () => {
         if (assn.type === "graphics" || assn.type === "console") {
           submitQuery([
             {
-              content: generateCodeSystemPrompt(assn.assignment, data.name),
+              content: generateCodeSystemPrompt(data.name),
               role: "system",
             },
-            { content: generateCodeUserPrompt(data.code), role: "user" },
+            {
+              content: generateCodeUserPrompt(assn.assignment, data.code),
+              role: "user",
+            },
           ]);
         } else if (assn.type === "karel") {
           submitQuery([
             {
-              content: generateKarelSystemPrompt(assn.assignment, data.name),
+              content: generateKarelSystemPrompt(data.name),
               role: "system",
             },
-            { content: generateCodeUserPrompt(data.code), role: "user" },
+            {
+              content: generateCodeUserPrompt(assn.assignment, data.code),
+              role: "user",
+            },
           ]);
         } else if (assn.type === "essay") {
           submitQuery([
@@ -318,7 +318,7 @@ const Chat = () => {
   }, [AIState]);
 
   return data && assn ? (
-    <div className="flex flex-col gap-4 items-center pt-48 w-full px-48">
+    <div className="flex flex-col gap-4 items-center w-full lg:p-48 md:p-8">
       <div className="bg-white rounded-lg drop-shadow-md p-4 self-end flex gap-4 items-center px-8">
         <span className="text-gray-400">Voice Mode</span>
         <Switch
@@ -387,21 +387,43 @@ const Chat = () => {
           </div>
           {AIState === "listening" ? (
             <>
-              <span className="text-purple-600 mt-2 text-gray-400 flex flex-row gap-2 items-center fade-in">
-                <div class="dot dot--basic"></div>{" "}
-                <div>
-                  Liz is now <b>listening...</b> start speaking! Press 'enter'
-                  to finish.
+              <span className="text-purple-600 mt-2 text-gray-400 flex flex-col gap-2 fade-in">
+                <div className="flex flex-row gap-2">
+                  <div class="dot dot--basic"></div>{" "}
+                  <div>
+                    Liz is now <b>listening...</b> start speaking! Press 'enter'
+                    to finish.
+                  </div>
                 </div>
+                <Button
+                  type="dashed"
+                  className="self-start"
+                  onClick={() => {
+                    stopRecording();
+                    setAIState("editing");
+                  }}
+                >
+                  Stop Speaking
+                </Button>
               </span>
             </>
           ) : AIState === "waiting" ? (
             <>
-              <span className="text-gray-600 mt-2 text-gray-400 flex flex-row gap-2 items-center fade-in">
+              <span className="text-gray-600 mt-2 text-gray-400 flex flex-col gap-2 fade-in">
                 <div>
                   Take a few seconds to understand the question. Press{" "}
                   <b>enter</b> when you're ready to start speaking.
                 </div>
+                <Button
+                  type="dashed"
+                  className="self-start"
+                  onClick={() => {
+                    startRecording();
+                    setAIState("listening");
+                  }}
+                >
+                  Start Speaking
+                </Button>
               </span>
             </>
           ) : AIState === "editing" && voiceMode ? (
@@ -415,12 +437,23 @@ const Chat = () => {
             </>
           ) : AIState === "closure" ? (
             <>
-              <span className="text-gray-600 mt-2 text-gray-400 flex flex-row gap-2 items-center fade-in">
+              <span className="text-gray-600 mt-2 text-gray-400 flex flex-col gap-2 fade-in">
                 <div>
                   Thanks so much for participating in this experimental tool! We
                   hoped you learnt a little more about how well you understand
                   your program.
                 </div>
+                <Button
+                  type="dashed"
+                  className="self-start"
+                  onClick={() => {
+                    alert(
+                      "Thanks for participating! You can close this tab now."
+                    );
+                  }}
+                >
+                  Finish
+                </Button>
               </span>
             </>
           ) : null}

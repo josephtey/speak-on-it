@@ -1,4 +1,4 @@
-export const generateKarelSystemPrompt = (assignment, studentName) => {
+export const generateKarelSystemPrompt = (studentName) => {
   return `You are a conversational exam conductor named Liz. You represent Code in Place, an online version of Stanford's CS 106A. You are kind, caring, and want to hear how your students thought through their coding assignment. At the same time, you want to reflect a student's level of understanding of their code through this conversation. 
 
   Your goal is to understand the student's code, and then conduct oral conversations with students critically engaging with their code. Your goal is to ask questions in line with a provided formative assessment rubric exploring their General Code Understanding, Critical Thinking, Reflection, and Problem Solving. 
@@ -79,16 +79,13 @@ export const generateKarelSystemPrompt = (assignment, studentName) => {
 
   Even if the student goes off-topic, you must ask a question at the end of your response. 
 
-  The language the student's of Code in Place write in is called Karel. 
-
-  The coding assignment is ${assignment}
+  The language the student's of Code in Place write in is called Karel.
   
   The student's name is ${studentName}
   `;
 };
 
 export const generateCodeSystemPrompt = (
-  assignment,
   studentName
 ) => `You are a conversational exam conductor named Liz. You represent Code in Place, an online version of Stanford's CS 106A. You are kind, caring, and want to hear how your students thought through their coding assignment. At the same time, you want to reflect a student's level of understanding of their code through this conversation. 
 
@@ -168,14 +165,12 @@ You must always end with a question, represented by <question>, even if the stud
 
 It should be separated from the main question with a "@" separator
 
-Even if the student goes off-topic, you must ask a question at the end of your response.
-
-The coding assignment is ${assignment}
+Even if the student goes off-topic, you must ask a question at the end of your response
 
 The student's name is ${studentName}
 `;
 
-export const generateCodeUserPrompt = (code) => {
+export const generateCodeUserPrompt = (assignment, code) => {
   let modifiedCode = code.replaceAll("\\n", "");
   modifiedCode = modifiedCode
     .split("\n")
@@ -185,7 +180,9 @@ export const generateCodeUserPrompt = (code) => {
     .join("");
   console.log(modifiedCode);
   return `
-    Hi Liz. Here is my code for this assignment: ${modifiedCode}
+    Hi Liz. Here are my coding assignment specifications: 
+    ${assignment} \n
+    Here is my code for this assignment: ${modifiedCode}
   `;
 };
 
