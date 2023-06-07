@@ -62,7 +62,7 @@ const Home = (props) => {
   return (
     <div className="flex w-full items-center h-screen flex-wrap flex-col flex-nowrap">
       <div className="flex flex-col gap-8 w-full py-8 items-center justify-center">
-        <div className="mb-16 flex flex-col items-center my-48 w-1/2 text-2xl bg-white rounded-lg shadow-md p-8">
+        <div className="mb-16 flex flex-col items-center my-48 w-1/2 text-xl bg-white rounded-lg shadow-md p-8">
           {step === 1 ? (
             <>
               <div className="w-full h-[600px]">
