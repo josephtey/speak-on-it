@@ -1,272 +1,305 @@
 import react, { useState } from "react";
-import { Button, Form, Input, Tag, InputNumber, Card } from "antd";
+import { Button, Form, Input, Tag, InputNumber, Card, Alert } from "antd";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../utils/firebase";
-import { Radio } from "antd";
-import { sampleCodeAss } from "../consts/assns";
+import { Select } from "antd";
+import Liz from "../img/liz.gif";
 
 const { TextArea } = Input;
 
+const cip_items = [
+  {
+    label: "Baby Snake",
+    value: "babysnake",
+  },
+  {
+    label: "Quilt",
+    value: "quilt",
+  },
+  {
+    label: "Khansole Academy",
+    value: "khansole",
+  },
+  {
+    label: "Draw Flag",
+    value: "flag",
+  },
+  {
+    label: "Fill Karel",
+    value: "fillkarel",
+  },
+];
+
 const Home = (props) => {
-  // const [isUploading, setIsUploading] = useState(false);
-  // const [openFileSelector, { plainFiles, loading }] = useFilePicker({
-  //   multiple: false,
-  //   readFilesContent: false,
-  // });
-
-  // useEffect(() => {
-  //   if (plainFiles.length > 0 && !isUploading) {
-  //     const firstFile = plainFiles[0];
-  //     setIsUploading(true);
-  //     uploadImg(firstFile);
-  //   }
-  // }, [plainFiles]);
-
-  // const handleFileUpload = (event) => {
-  //   event.stopPropagation();
-
-  //   if (!isUploading) {
-  //     openFileSelector();
-  //   }
-  // };
-
-  // const uploadImg = (file) => {
-  //   const storageRef = ref(storage, file.name);
-
-  //   const uploadTask = uploadBytesResumable(storageRef, file);
-
-  //   Swal.fire({
-  //     title: `Uploading new file...`,
-  //     toast: true,
-  //     showClass: {
-  //       popup: "none",
-  //     },
-  //     showConfirmButton: false,
-  //   });
-
-  //   uploadTask.on(
-  //     "state_changed",
-  //     (snapshot) => {
-  //       let progress =
-  //         Math.round(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-  //       progress = Math.min(99, progress);
-  //     },
-  //     (error) => {
-  //       setIsUploading(false);
-  //     },
-  //     () => {
-  //       getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-  //         Swal.fire({
-  //           title: `Success!`,
-  //           toast: true,
-  //           showClass: {
-  //             popup: "none",
-  //           },
-  //           icon: "success",
-  //           timer: 1000,
-  //           timerProgressBar: true,
-  //           showConfirmButton: false,
-  //         });
-  //       });
-  //       setIsUploading(false);
-  //     }
-  //   );
-  // };
-  const handleModeChange = (e) => {
-    setMode(e.target.value);
-  };
-
-  const [mode, setMode] = useState("essay");
-
   const handleSubmitCode = async () => {
-    const values = codeForm.getFieldsValue(true);
+    const basicValues = basicInfoForm.getFieldsValue(true);
+    console.log(basicValues);
+    if (
+      basicValues.name &&
+      basicValues.email &&
+      basicValues.code &&
+      basicValues.assignment
+    ) {
+      const codeRef = collection(db, "assns");
+      const newDoc = await addDoc(codeRef, {
+        name: basicValues.name,
+        email: basicValues.email,
+        code: basicValues.code,
+        time: new Date().getTime(),
+        codeAssignment: basicValues.assignment,
+        numBaseQuestions: 0,
+      });
 
-    const codeRef = collection(db, "assns");
-    const newDoc = await addDoc(codeRef, {
-      name: values.name,
-      code: values.code,
-      codeAssignment: sampleCodeAss(),
-      type: "code",
-    });
-
-    props.history.push("/chat/" + newDoc.id);
+      props.history.push("/chat/" + newDoc.id);
+    } else {
+      setShowError(true);
+    }
   };
-  const handleSubmitEssay = async () => {
-    const values = essayForm.getFieldsValue(true);
+  const [step, setStep] = useState(1);
+  const [basicInfoForm] = Form.useForm();
+  const [showError, setShowError] = useState(false);
 
-    const essaysRef = collection(db, "assns");
-    const newDoc = await addDoc(essaysRef, {
-      name: values.name,
-      essay: values.essay,
-      prompt: values.essayPrompt,
-      type: "essay",
-    });
-
-    props.history.push("/chat/" + newDoc.id);
-  };
-  const [essayForm] = Form.useForm();
-  const [codeForm] = Form.useForm();
   return (
     <div className="flex w-full items-center h-screen flex-wrap flex-col flex-nowrap">
-      <div
-        className="text-6xl text-center font-bold mb-4 mx-32 mt-32"
-        style={{
-          lineHeight: "70px",
-        }}
-      >
-        Speak On It
-      </div>
-      <p className="text-center text-lg text-gray-400">
-        Evaluation through Conversation
-      </p>
-      <Radio.Group onChange={handleModeChange} value={mode} className="my-8">
-        <Radio.Button value="essay">Essay</Radio.Button>
-        <Radio.Button value="code">Code</Radio.Button>
-      </Radio.Group>
-      {mode === "essay" ? (
-        <div className="mb-16 flex w-full flex-col items-center">
-          <Form
-            form={essayForm}
-            layout="vertical"
-            autoComplete="off"
-            onFinish={async () => {
-              await handleSubmitEssay();
-            }}
-            className="py-16 w-1/2"
-          >
-            <Form.Item
-              label="What's your name?"
-              name="name"
-              rules={[{ required: true, message: "Your name can't be empty!" }]}
-            >
-              <Input placeholder="e.g. Bob" />
-            </Form.Item>
-            <Form.Item
-              label="Paste the prompt of your essay here"
-              name="essayPrompt"
-              rules={[
-                { required: true, message: "Your prompt can't be empty!" },
-              ]}
-            >
-              <Input placeholder="e.g. The task of this essay is to ..." />
-            </Form.Item>
+      <div className="flex flex-col gap-8 w-full py-8 items-center justify-center">
+        <div className="mb-16 flex flex-col items-center my-48 w-1/2 text-xl bg-white rounded-lg shadow-md p-8">
+          {step === 1 ? (
+            <>
+              <div className="w-full h-[600px]">
+                <p>
+                  Hello! We hoped you enjoyed <b>Code in Place 2023!</b>
+                </p>{" "}
+                <br />
+                <p>
+                  We know that you have completed many assignments... all of
+                  which have been amazing.
+                </p>{" "}
+                <br />
+                <p>
+                  As a <b>celebration</b>, we want to give you the opportunity
+                  to{" "}
+                  <b className="underline decoration-pink-500 decoration-2">
+                    talk about your favorite assignment!
+                  </b>
+                </p>{" "}
+                <p className="text-center text-4xl m-16 leading-relaxed">
+                  We believe that if you <b>truly understand something</b>, you
+                  should be able to <b>speak on it.</b>
+                </p>
+                <p>
+                  This is also a very important skill for{" "}
+                  <b>coding interviews.</b>
+                </p>{" "}
+                <br />
+                <p>
+                  This experience will involve you talking to an AI agent called{" "}
+                  <b>Liz</b> for around{" "}
+                  <b className="underline decoration-sky-500 decoration-2">
+                    10-15 minutes
+                  </b>
+                  . You are required to have a{" "}
+                  <b className="underline decoration-sky-500 decoration-2">
+                    microphone
+                  </b>
+                  , as you will be verbally explaining your thinking!
+                </p>
+                <br />
+                <p>Do you want to take part in this experience?</p>
+              </div>
+              <div className="flex flex-row justify-end w-full">
+                <div
+                  className="rounded-lg text-white bg-blue-500 hover:bg-blue-600 cursor-pointer px-8 py-4 font-bold w-54 text-center self-end mb-4"
+                  onClick={() => {
+                    setStep(2);
+                  }}
+                >
+                  Yes!
+                </div>
+              </div>
+            </>
+          ) : step === 2 ? (
+            <>
+              <div className="w-full h-[600px]">
+                <img src={Liz} className="rounded-lg w-36 mb-8" />
+                <p>Yay! We hope you're just as excited as we are!</p> <br />
+                <p>Meet Liz, your AI 'pal for this experience.</p>
+                <br />
+                <p>
+                  For context, we are Joe & Shaurya, two undergraduate
+                  sophomores at Stanford working at the Piech Lab! We are using
+                  generative AI to make this experience possible, and as a full
+                  disclaimer, we are acutely aware of the potential biases, and
+                  hallucinations that often occur with this technology.
+                </p>
+                <br />
+                <p>
+                  As such, please remember that this is an experimental tool!
+                </p>
+              </div>
+              <div className="flex flex-row justify-between w-full">
+                <div
+                  className="rounded-lg text-blue-500 bg-white border-2 border-blue-500 hover:bg-gray-100 cursor-pointer px-8 py-4 font-bold w-54 text-center self-end mb-4"
+                  onClick={() => {
+                    setStep(1);
+                  }}
+                >
+                  Back
+                </div>
+                <div
+                  className="rounded-lg text-white bg-blue-500 hover:bg-blue-600 cursor-pointer px-8 py-4 font-bold w-54 text-center self-end mb-4"
+                  onClick={() => {
+                    setStep(3);
+                  }}
+                >
+                  Next
+                </div>
+              </div>
+            </>
+          ) : step === 3 ? (
+            <>
+              <Form
+                form={basicInfoForm}
+                layout="vertical"
+                autoComplete="off"
+                className="w-full h-[600px]"
+                size={"large"}
+              >
+                <Form.Item
+                  label="What's your name?"
+                  name="name"
+                  rules={[
+                    { required: true, message: "Your name can't be empty!" },
+                  ]}
+                >
+                  <Input placeholder="e.g. Bob" />
+                </Form.Item>
+                <Form.Item
+                  label="What is your email (use the same email you used for Code in Place!)"
+                  name="email"
+                  rules={[
+                    { required: true, message: "Your email can't be empty!" },
+                  ]}
+                >
+                  <Input placeholder="e.g. bob@gmail.com" />
+                </Form.Item>
+                <Form.Item
+                  label="Which assignment do you want to speak on? Pick your favorite assignment!"
+                  name="assignment"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Your chosen assignment can't be empty!",
+                    },
+                  ]}
+                >
+                  <Select>
+                    {cip_items.map((item) => {
+                      return (
+                        <Select.Option value={item.value}>
+                          {item.label}
+                        </Select.Option>
+                      );
+                    })}
+                  </Select>
+                </Form.Item>
+              </Form>
 
-            <Form.Item
-              label="Paste your essay here"
-              name="essay"
-              rules={[
-                {
-                  required: true,
-                  message: "Your essay can't be empty!",
-                },
-              ]}
-            >
-              <TextArea
-                showCount
-                rows={10}
-                placeholder="e.g. The attack commenced at 7:48 a.m. Hawaiian Time (6:18 p.m. GMT). The base was attacked by 353 Imperial Japanese aircraft (including fighters, level and dive bombers, and torpedo bombers) in two waves, launched from six aircraft carriers. Of the eight U.S. Navy battleships present, all were damaged, with four sunk. All but USS Arizona were later raised, and six were returned to service and went on to fight in the war. The Japanese also sank or damaged three cruisers, three destroyers, an anti-aircraft training ship, and one minelayer. More than 180 US aircraft were destroyed. 2,403 Americans were killed and 1,178 others were wounded. Important base installations such as the power station, dry dock, shipyard, maintenance, and fuel and torpedo storage facilities, as well as the submarine piers and headquarters building (also home of the intelligence section) were not attacked. Japanese losses were light: 29 aircraft and five midget submarines lost, and 64 servicemen killed. Kazuo Sakamaki, the commanding officer of one of the submarines, was captured."
-              />
-            </Form.Item>
-          </Form>
-          <div
-            className="rounded-lg text-white bg-blue-500 hover:bg-blue-600 cursor-pointer px-8 py-4 font-bold w-54 text-center self-center mb-16"
-            onClick={() => {
-              essayForm.submit();
+              <div className="flex flex-row justify-between w-full">
+                <div
+                  className="rounded-lg text-blue-500 bg-white border-2 border-blue-500 hover:bg-gray-100 cursor-pointer px-8 py-4 font-bold w-54 text-center self-end mb-4"
+                  onClick={() => {
+                    setStep(2);
+                  }}
+                >
+                  Back
+                </div>
+                <div
+                  className="rounded-lg text-white bg-blue-500 hover:bg-blue-600 cursor-pointer px-8 py-4 font-bold w-54 text-center self-start mb-4"
+                  onClick={() => {
+                    setStep(4);
+                  }}
+                >
+                  Next
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <a
+                className="rounded-lg text-white bg-pink-500 hover:bg-pink-600 hover:text-white cursor-pointer px-8 py-4 w-54 self-center mb-4 "
+                href={
+                  basicInfoForm.getFieldsValue(true).assignment
+                    ? "http://codeinplace.stanford.edu/cip3/ide/a/" +
+                      basicInfoForm.getFieldsValue(true).assignment
+                    : "https://codeinplace.stanford.edu/cip3/code"
+                }
+                target="_blank"
+                rel="noreferrer"
+              >
+                Click here to find your assignment code
+                {basicInfoForm.getFieldsValue(true).assignment ? (
+                  <>
+                    {" "}
+                    for <b>{basicInfoForm.getFieldsValue(true).assignment} </b>
+                  </>
+                ) : null}
+              </a>
+              <Form
+                form={basicInfoForm}
+                layout="vertical"
+                autoComplete="off"
+                onFinish={async () => {
+                  await handleSubmitCode();
+                }}
+                className="w-full h-[600px]"
+                size={"large"}
+              >
+                <Form.Item
+                  label="Paste your entire code here for the assignment that you chose!"
+                  name="code"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Your code can't be empty!",
+                    },
+                  ]}
+                >
+                  <TextArea showCount rows={10} />
+                </Form.Item>
+              </Form>
+              <div className="flex flex-row justify-between w-full">
+                <div
+                  className="rounded-lg text-blue-500 bg-white border-2 border-blue-500 hover:bg-gray-100 cursor-pointer px-8 py-4 font-bold w-54 text-center self-start mb-4"
+                  onClick={() => {
+                    setStep(3);
+                  }}
+                >
+                  Back
+                </div>
+                <div
+                  className="rounded-lg text-white bg-blue-500 hover:bg-blue-600 cursor-pointer px-8 py-4 font-bold w-54 text-center self-center mb-4"
+                  onClick={() => {
+                    handleSubmitCode();
+                  }}
+                  htmlType="submit"
+                >
+                  Speak on it!
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        {showError ? (
+          <Alert
+            message="Please fill out all the fields"
+            type="error"
+            closable
+            onClose={() => {
+              setShowError(false);
             }}
-            htmlType="submit"
-          >
-            Try Now!
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-row gap-8 w-full px-48 py-8">
-          <p className="w-1/2 h-screen overflow-scroll">
-            <h1>The Game of Nimm</h1>
-            Nimm is an ancient game of strategy that is named after the old
-            German word for "take." It is also called Tiouk Tiouk in West Africa
-            and Tsynshidzi in China. Players alternate taking stones until there
-            are zero left. The game of Nimm goes as follows: <br />
-            <br />
-            <ol>
-              <li>
-                1. The game starts with a pile of 20 stones between the players
-              </li>
-              <li>2. The two players alternate turns </li>
-              <li>
-                3. On a given turn, a player may take either 1 or 2 stone from
-                the center pile 4.{" "}
-              </li>
-              <li>
-                4. The two players continue until the center pile has run out of
-                stones.{" "}
-              </li>
-            </ol>
-            <br />
-            The last player to take a stone loses. To make your life easier we
-            have broken the problem down into smaller milestones. You have a lot
-            of time for this program. Take it slowly, piece by piece.
-            <h2>Milestone 1</h2>
-            Start with 20 stones. Repeat the process of removing stones and
-            printing out how many stones are left until there are zero. Don't
-            worry about whose turn it is. Don't worry about making sure only one
-            or two stones are removed. Use the method readInt(msg) which prints
-            msg and waits for the user to enter a number.
-            <h2>Milestone 2</h2>
-            Create a variable of type int to keep track of whose turn it is
-            (remember there are two players). Tell the user whose turn it is.
-            Each time someone picks up stones, change the player number.
-            <h2>Milestone 3</h2>
-            Make sure that each turn only one or two stones are removed. After
-            you read a number of stones to remove from a user (their input), you
-            can use the following pattern to check if it was valid and keep
-            asking until it is valid.
-            <h2>Milestone 4</h2>
-            Announce the winner.
-          </p>
-          <div className="w-1/2">
-            <Form
-              form={codeForm}
-              layout="vertical"
-              autoComplete="off"
-              onFinish={async () => {
-                await handleSubmitCode();
-              }}
-              className="py-16"
-            >
-              <Form.Item
-                label="What's your name?"
-                name="name"
-                rules={[
-                  { required: true, message: "Your name can't be empty!" },
-                ]}
-              >
-                <Input placeholder="e.g. Bob" />
-              </Form.Item>
-              <Form.Item
-                label="Paste your code here"
-                name="code"
-                rules={[
-                  {
-                    required: true,
-                    message: "Your code can't be empty!",
-                  },
-                ]}
-              >
-                <TextArea showCount rows={10} />
-              </Form.Item>
-            </Form>
-            <div
-              className="rounded-lg text-white bg-blue-500 hover:bg-blue-600 cursor-pointer px-8 py-4 font-bold w-54 text-center self-center mb-4"
-              onClick={() => {
-                codeForm.submit();
-              }}
-              htmlType="submit"
-            >
-              Try Now!
-            </div>
-          </div>
-        </div>
-      )}
+          />
+        ) : null}
+      </div>
     </div>
   );
 };
