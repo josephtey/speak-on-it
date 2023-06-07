@@ -34,7 +34,6 @@ const Home = (props) => {
   const handleSubmitCode = async () => {
     const basicValues = basicInfoForm.getFieldsValue(true);
     console.log(basicValues);
-
     if (
       basicValues.name &&
       basicValues.email &&
