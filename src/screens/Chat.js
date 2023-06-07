@@ -66,6 +66,8 @@ const Chat = () => {
   const textInput = useRef();
 
   const [data, setData] = useState();
+  const [assn, setAssn] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       const docRef = doc(db, "assns", id);
@@ -76,6 +78,17 @@ const Chat = () => {
 
     fetchData();
   }, []);
+
+  useEffect(() => {
+    const fetchAssnData = async (assnid) => {
+      const docRef = doc(db, "cip", assnid);
+      const docSnap = await getDoc(docRef);
+      setAssn(docSnap.data());
+    };
+    if (data) {
+      fetchAssnData(data.codeAssignment);
+    }
+  }, [data]);
 
   const [messages, submitQuery] = useChatCompletion({
     model: GPT4.BASE,
@@ -101,7 +114,11 @@ const Chat = () => {
 
   useEffect(() => {
     if (messages?.length > 1) {
-      if (data.type === "code" || data.type === "karel") {
+      if (
+        assn.type === "console" ||
+        assn.type === "karel" ||
+        assn.type === "graphics"
+      ) {
         if (messages[messages.length - 1].content.includes("@")) {
           setAIState("speaking");
           setCurrentText(messages[messages.length - 1].content.split("@")[1]);
@@ -122,7 +139,11 @@ const Chat = () => {
   useEffect(() => {
     if (textInput.current) {
       if (!isLoading) {
-        if (data.type === "code" || data.type === "karel") {
+        if (
+          assn.type === "console" ||
+          assn.type === "karel" ||
+          assn.type === "graphics"
+        ) {
           // console.log(allText.split("@")[1]);
           console.log("EVERYTHING: ", allText);
 
@@ -199,7 +220,11 @@ const Chat = () => {
   }, [AIState]);
 
   const onSend = () => {
-    if (data.type === "code" || data.type === "karel") {
+    if (
+      assn.type === "console" ||
+      assn.type === "karel" ||
+      assn.type === "graphics"
+    ) {
       submitQuery([
         {
           content:
@@ -226,7 +251,7 @@ const Chat = () => {
           role: "user",
         },
       ]);
-    } else if (data.type === "essay") {
+    } else if (assn.type === "essay") {
       submitQuery([{ content: promptText, role: "user" }]);
     }
     setAIState("thinking");
@@ -235,34 +260,31 @@ const Chat = () => {
   };
 
   useEffect(() => {
-    if (data) {
-      if (!data.transcript) {
+    if (data && assn) {
+      if (data.transcript) {
         if (data.transcript[data.transcript.length - 1].role === "assistant") {
           submitQuery(data.transcript.slice(0, -1));
         } else {
           submitQuery(data.transcript);
         }
       } else {
-        if (data.type === "code") {
+        if (assn.type === "graphics" || assn.type === "console") {
           submitQuery([
             {
-              content: generateCodeSystemPrompt(data.codeAssignment, data.name),
+              content: generateCodeSystemPrompt(assn.assignment, data.name),
               role: "system",
             },
             { content: generateCodeUserPrompt(data.code), role: "user" },
           ]);
-        } else if (data.type === "karel") {
+        } else if (assn.type === "karel") {
           submitQuery([
             {
-              content: generateKarelSystemPrompt(
-                data.codeAssignment,
-                data.name
-              ),
+              content: generateKarelSystemPrompt(assn.assignment, data.name),
               role: "system",
             },
             { content: generateCodeUserPrompt(data.code), role: "user" },
           ]);
-        } else if (data.type === "essay") {
+        } else if (assn.type === "essay") {
           submitQuery([
             {
               content: generateEssaySystemPrompt(data.essayPrompt, data.name),
@@ -273,7 +295,7 @@ const Chat = () => {
         }
       }
     }
-  }, [data]);
+  }, [data, assn]);
 
   useEffect(() => {
     if (AIState === "listening") {
@@ -295,7 +317,7 @@ const Chat = () => {
     }
   }, [AIState]);
 
-  return data ? (
+  return data && assn ? (
     <div className="flex flex-col gap-4 items-center pt-48 w-full px-48">
       <div className="bg-white rounded-lg drop-shadow-md p-4 self-end flex gap-4 items-center px-8">
         <span className="text-gray-400">Voice Mode</span>
@@ -429,7 +451,9 @@ const Chat = () => {
             ) : null}
           </div> */}
         </div>
-        {data.type === "karel" || data.type === "code" ? (
+        {assn.type === "karel" ||
+        assn.type === "console" ||
+        assn.type === "graphics" ? (
           <AceEditor
             markers={markers}
             id="editor"
@@ -450,7 +474,7 @@ const Chat = () => {
             fontSize={18}
             className="rounded-lg w-1/2"
           />
-        ) : data.type === "essay" ? (
+        ) : assn.type === "essay" ? (
           <div className="w-1/2 elative bg-[#fffaed] h-[600px] rounded-lg drop-shadow-md px-8 overflow-scroll">
             <h2 className="text-[#725424] font-serif font-bold">
               For reference, here is your essay.{" "}
