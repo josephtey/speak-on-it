@@ -86,6 +86,7 @@ const Home = (props) => {
       name: values.name,
       code: values.code,
       codeAssignment: values.codeAssignment,
+      numBaseQuestions: 0,
       type: mode,
     });
 

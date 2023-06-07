@@ -48,6 +48,7 @@ const Chat = () => {
     },
   });
 
+  const [baseQuestionsNum, setBaseQuestionsNum] = useState(0);
   const [voiceMode, setVoiceMode] = useState(true);
   const [details, setDetails] = useState(null);
   const [markers, setMarkers] = useState([]);
@@ -70,6 +71,7 @@ const Chat = () => {
       const docRef = doc(db, "assns", id);
       const docSnap = await getDoc(docRef);
       setData(docSnap.data());
+      setBaseQuestionsNum(docSnap.data().numBaseQuestions);
     };
 
     fetchData();
@@ -86,6 +88,14 @@ const Chat = () => {
 
     await updateDoc(essaysRef, {
       transcript: messages,
+    });
+  };
+
+  const incrementBaseQuestionNum = async () => {
+    const essaysRef = doc(db, "assns", id);
+
+    await updateDoc(essaysRef, {
+      numBaseQuestions: baseQuestionsNum + 1,
     });
   };
 
@@ -112,12 +122,6 @@ const Chat = () => {
   useEffect(() => {
     if (textInput.current) {
       if (!isLoading) {
-        if (voiceMode) {
-          setAIState("waiting");
-        } else {
-          setAIState("editing");
-        }
-
         if (data.type === "code" || data.type === "karel") {
           // console.log(allText.split("@")[1]);
           console.log("EVERYTHING: ", allText);
@@ -126,9 +130,15 @@ const Chat = () => {
             const details = JSON.parse(
               allText.split("@")[0].replaceAll("\n", "").trim()
             );
+
+            if (details.type === "baseQuestion") {
+              setBaseQuestionsNum(baseQuestionsNum + 1);
+              incrementBaseQuestionNum();
+            }
+
             setDetails(details);
             console.log("DETAILS: ", details);
-            if (details.type !== "none") {
+            if (details.type !== "intro" && details.type !== "closure") {
               setMarkers([
                 {
                   startRow: details.lineNo - 1,
@@ -140,8 +150,23 @@ const Chat = () => {
                 },
               ]);
             }
+            if (details.type === "closure") {
+              setAIState("closure");
+            } else {
+              if (voiceMode) {
+                setAIState("waiting");
+              } else {
+                setAIState("editing");
+              }
+            }
           } catch (e) {
             console.error(e);
+          }
+        } else {
+          if (voiceMode) {
+            setAIState("waiting");
+          } else {
+            setAIState("editing");
           }
         }
         // setTextToVoice(messages[messages.length - 1].content);
@@ -190,7 +215,13 @@ const Chat = () => {
             @
             <question>
             
-            You must remember to include the '@' delimiter. The question should also include a friendly response to the studen's previous answer.
+            You must start with the dictionary, remember to include the '@' delimiter, and it must end with a question. The question should also include a friendly response to the student's previous answer.
+
+            You have asked ${baseQuestionsNum} base question${
+              baseQuestionsNum !== 1 ? "s" : ""
+            } so far. You need to ask ${
+              3 - baseQuestionsNum
+            } more base question${baseQuestionsNum !== 1 ? "s" : ""}.
             </span>`,
           role: "user",
         },
@@ -205,7 +236,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (data) {
-      if (data.transcript) {
+      if (!data.transcript) {
         if (data.transcript[data.transcript.length - 1].role === "assistant") {
           submitQuery(data.transcript.slice(0, -1));
         } else {
@@ -357,6 +388,16 @@ const Chat = () => {
                 <div>
                   If we transcribed your answer inaccurately, feel free to{" "}
                   <b>edit</b> it before clicking send.
+                </div>
+              </span>
+            </>
+          ) : AIState === "closure" ? (
+            <>
+              <span className="text-gray-600 mt-2 text-gray-400 flex flex-row gap-2 items-center fade-in">
+                <div>
+                  Thanks so much for participating in this experimental tool! We
+                  hoped you learnt a little more about how well you understand
+                  your program.
                 </div>
               </span>
             </>
