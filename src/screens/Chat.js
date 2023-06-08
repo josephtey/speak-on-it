@@ -332,7 +332,6 @@ const Chat = () => {
       setPromptText(transcript.text);
     }
   }, [transcript]);
-
   useEffect(() => {
     if (AIState === "speaking") {
       // textToSpeech("21m00Tcm4TlvDq8ikWAM", textToVoice, elevenLabsAPI, {
