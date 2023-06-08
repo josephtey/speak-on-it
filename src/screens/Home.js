@@ -1,9 +1,10 @@
-import react, { useState } from "react";
+import react, { useEffect, useState } from "react";
 import { Button, Form, Input, Tag, InputNumber, Card, Alert } from "antd";
 import { addDoc, collection } from "firebase/firestore";
-import { db } from "../utils/firebase";
+import { db, analytics } from "../utils/firebase";
 import { Select } from "antd";
 import Liz from "../img/liz.gif";
+import { logEvent } from "firebase/analytics";
 
 const { TextArea } = Input;
 
@@ -58,6 +59,12 @@ const Home = (props) => {
   const [step, setStep] = useState(1);
   const [basicInfoForm] = Form.useForm();
   const [showError, setShowError] = useState(false);
+
+  useEffect(() => {
+    logEvent(analytics, "screen_view", {
+      screen: "home_page",
+    });
+  }, []);
 
   return (
     <div className="flex w-full items-center h-screen flex-wrap flex-col flex-nowrap lg:p-48">
