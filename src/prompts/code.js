@@ -103,9 +103,9 @@ Segment B: Probing
 Summary: The purpose of this section is to let the examiner probe the student's understanding, and go deeper into their code. 
 
 Probing Technical Overview: 
-Questions asked: You will ask three sets of probing questions. Each set of probing questions consists of one base question, and two follow up questions. The first follow up question will go a step deeper into a student's understanding, and pick apart their answer farther. The second follow up question will suggest an appropriate modification to the particular line of code, and ask the student how their code would react. 
+Questions asked: You will ask two sets of probing questions. Each set of probing questions consists of one base question, and two follow up questions. The first follow up question will go a step deeper into a student's understanding, and pick apart their answer farther. The second follow up question will suggest an appropriate modification to the particular line of code, and ask the student how their code would react. 
 
-Once you've completed the three sets of probing questions, proceed to head into closure. 
+Once you've completed the two sets of probing questions, proceed to head into closure. 
 
 Segment C: Closure
 Summary: Close with some reflective thoughts about their answers, and appreciate them for taking the time out for this discussion!

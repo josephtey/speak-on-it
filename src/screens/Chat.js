@@ -104,6 +104,20 @@ const Chat = () => {
     });
   };
 
+  const logError = async (error) => {
+    const essaysRef = doc(db, "assns", id);
+
+    if (data.errors && data.errors.length > 0) {
+      await updateDoc(essaysRef, {
+        errors: [...data.errors, error],
+      });
+    } else {
+      await updateDoc(essaysRef, {
+        errors: [error],
+      });
+    }
+  };
+
   const incrementBaseQuestionNum = async () => {
     const essaysRef = doc(db, "assns", id);
 
@@ -184,6 +198,7 @@ const Chat = () => {
             alert(
               "Error. Please refresh the page. If this doesn't work, try again!"
             );
+            logError(e.message);
             console.error(e);
           }
         }
@@ -242,8 +257,8 @@ const Chat = () => {
             You have asked ${baseQuestionsNum} base question${
               baseQuestionsNum !== 1 ? "s" : ""
             } so far. You need to ask ${
-              3 - baseQuestionsNum
-            } more base question${baseQuestionsNum !== 1 ? "s" : ""}.
+              2 - baseQuestionsNum
+            } more base question${2 - baseQuestionsNum !== 1 ? "s" : ""}.
             </span>`,
           role: "user",
         },
@@ -259,10 +274,22 @@ const Chat = () => {
   useEffect(() => {
     if (data && assn) {
       if (data.transcript) {
-        if (data.transcript[data.transcript.length - 1].role === "assistant") {
-          submitQuery(data.transcript.slice(0, -1));
+        // clean transcript
+        let cleanedTranscript = [];
+        for (let i = 0; i < data.transcript.length; i++) {
+          if (
+            data.transcript[i].role !== "" &&
+            data.transcript[i].content !== ""
+          ) {
+            cleanedTranscript.push(data.transcript[i]);
+          }
+        }
+        if (
+          cleanedTranscript[cleanedTranscript.length - 1].role === "assistant"
+        ) {
+          submitQuery(cleanedTranscript.slice(0, -1));
         } else {
-          submitQuery(data.transcript);
+          submitQuery(cleanedTranscript);
         }
       } else {
         if (assn.type === "graphics" || assn.type === "console") {
@@ -391,7 +418,7 @@ const Chat = () => {
           {AIState === "listening" ? (
             <>
               <span className="text-purple-600 mt-2 text-gray-400 flex flex-col gap-2 fade-in">
-                <div className="flex flex-row gap-2">
+                <div className="flex flex-row gap-2 items-center">
                   <div class="dot dot--basic"></div>{" "}
                   <div>
                     Liz is now <b>listening...</b> start speaking! Press 'enter'
