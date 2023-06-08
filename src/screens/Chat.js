@@ -340,7 +340,6 @@ const Chat = () => {
       //   similarity_boost: 0.6,
       // });
     }
-
     if (AIState === "thinking") {
       setCurrentText("");
       setMarkers([]);
