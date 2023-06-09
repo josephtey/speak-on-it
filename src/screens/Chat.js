@@ -198,7 +198,10 @@ const Chat = () => {
             alert(
               "Error. Please refresh the page. If this doesn't work, try again!"
             );
-            logError(e.message);
+            logError({
+              errorMsg: e.message,
+              output: allText,
+            });
             console.error(e);
           }
         }
