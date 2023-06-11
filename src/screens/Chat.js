@@ -200,7 +200,7 @@ const Chat = () => {
             );
             logError({
               errorMsg: e.message,
-              output: allText,
+              output: messages,
             });
             console.error(e);
           }
