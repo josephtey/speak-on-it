@@ -32,6 +32,8 @@ const secretKey = process.env.REACT_APP_OPENAI_API_KEY;
 const Chat = () => {
   const { id } = useParams();
 
+  const [startStopSequenceRecording, setStartStopSequenceRecording] =
+    useState(false);
   const {
     transcript,
     startRecording,
@@ -47,6 +49,13 @@ const Chat = () => {
       language: "en",
     },
   });
+
+  useEffect(() => {
+    if (!speaking && startStopSequenceRecording) {
+      stopRecording();
+      setStartStopSequenceRecording(false);
+    }
+  }, [speaking]);
 
   const [baseQuestionsNum, setBaseQuestionsNum] = useState(0);
   const [voiceMode, setVoiceMode] = useState(true);
@@ -136,9 +145,8 @@ const Chat = () => {
         if (messages[messages.length - 1].content.includes("@")) {
           setAIState("speaking");
           setCurrentText(messages[messages.length - 1].content.split("@")[1]);
-        } else {
-          setAllText(messages[messages.length - 1].content);
         }
+        setAllText(messages[messages.length - 1].content);
       } else {
         if (messages[messages.length - 1].content) {
           setAIState("speaking");
@@ -221,7 +229,7 @@ const Chat = () => {
           startRecording();
           setAIState("listening");
         } else if (AIState === "listening") {
-          stopRecording();
+          setStartStopSequenceRecording(true);
           setAIState("editing");
         }
       }
@@ -331,7 +339,7 @@ const Chat = () => {
   }, [data, assn]);
 
   useEffect(() => {
-    if (AIState === "listening") {
+    if (AIState === "listening" || AIState === "editing") {
       setPromptText(transcript.text);
     }
   }, [transcript]);
@@ -430,7 +438,7 @@ const Chat = () => {
                   type="dashed"
                   className="self-start"
                   onClick={() => {
-                    stopRecording();
+                    setStartStopSequenceRecording(true);
                     setAIState("editing");
                   }}
                 >
@@ -559,7 +567,7 @@ const Chat = () => {
           }}
         >
           <ContentEditable
-            disabled={AIState !== "editing"} // use true to disable editing
+            disabled={AIState !== "editing" || speaking} // use true to disable editing
             onChange={(e) => {
               setPromptText(e.target.value);
             }}
