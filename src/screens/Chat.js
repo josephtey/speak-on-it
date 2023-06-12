@@ -142,7 +142,8 @@ const Chat = () => {
       if (
         assn.type === "console" ||
         assn.type === "karel" ||
-        assn.type === "graphics"
+        assn.type === "graphics" ||
+        assn.type === "essay"
       ) {
         if (messages[messages.length - 1].content.includes("@")) {
           setAIState("speaking");
@@ -163,17 +164,17 @@ const Chat = () => {
   useEffect(() => {
     if (textInput.current) {
       if (!isLoading) {
+        if (voiceMode) {
+          setAIState("waiting");
+        } else {
+          setAIState("editing");
+        }
         if (
           assn.type === "console" ||
           assn.type === "karel" ||
-          assn.type === "graphics"
+          assn.type === "graphics" ||
+          assn.type === "essay"
         ) {
-          if (voiceMode) {
-            setAIState("waiting");
-          } else {
-            setAIState("editing");
-          }
-
           // console.log(allText.split("@")[1]);
           console.log("EVERYTHING: ", allText);
 
@@ -189,7 +190,11 @@ const Chat = () => {
 
             setDetails(details);
             console.log("DETAILS: ", details);
-            if (details.type !== "intro" && details.type !== "closure") {
+            if (
+              details.type !== "intro" &&
+              details.type !== "closure" &&
+              assn.type !== "essay"
+            ) {
               setMarkers([
                 {
                   startRow: details.lineNo - 1,
@@ -277,7 +282,30 @@ const Chat = () => {
         },
       ]);
     } else if (assn.type === "essay") {
-      submitQuery([{ content: promptText, role: "user" }]);
+      submitQuery([
+        {
+          content:
+            promptText +
+            `\n<span>
+      Remember, for every question you ask, output the following structure:
+      {
+        "type": "baseQuestion",
+        "question": "What worked, and what didn't?"
+      }
+      @
+      <question>
+      
+      You must start with the dictionary, remember to include the '@' delimiter, and it must end with a question that starts with friendly response to the student's previous answer.
+
+      You have asked ${baseQuestionsNum} base question${
+              baseQuestionsNum !== 1 ? "s" : ""
+            } so far. You need to ask ${
+              2 - baseQuestionsNum
+            } more base question${2 - baseQuestionsNum !== 1 ? "s" : ""}.
+      </span>`,
+          role: "user",
+        },
+      ]);
     }
     setAIState("thinking");
     setDetails(null);

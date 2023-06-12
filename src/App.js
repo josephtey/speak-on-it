@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
+import HomeEssay from "./screens/HomeEssay";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <Router>
         <Switch>
           <Route exact path="/" component={Home} />
+          <Route exact path="/pwr" component={HomeEssay} />
           <Route exact path="/chat/:id" component={Chat} />
           <Route exact path="/evaluate/:id/" component={Evaluate} />
         </Switch>
