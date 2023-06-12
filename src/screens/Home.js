@@ -1,5 +1,5 @@
-import react, { useEffect, useState } from "react";
-import { Button, Form, Input, Tag, InputNumber, Card, Alert } from "antd";
+import React, { useEffect, useState } from "react";
+import { Form, Input, Alert } from "antd";
 import { addDoc, collection } from "firebase/firestore";
 import { db, analytics } from "../utils/firebase";
 import { Select } from "antd";
