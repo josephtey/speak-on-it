@@ -51,11 +51,13 @@ const Chat = () => {
   });
 
   useEffect(() => {
-    if (!speaking && startStopSequenceRecording) {
-      stopRecording();
-      setStartStopSequenceRecording(false);
+    if (startStopSequenceRecording) {
+      if (!speaking) {
+        stopRecording();
+        setStartStopSequenceRecording(false);
+      }
     }
-  }, [speaking]);
+  }, [speaking, startStopSequenceRecording]);
 
   const [baseQuestionsNum, setBaseQuestionsNum] = useState(0);
   const [voiceMode, setVoiceMode] = useState(true);
