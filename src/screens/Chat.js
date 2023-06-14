@@ -314,6 +314,7 @@ const Chat = () => {
 
   useEffect(() => {
     if (data && assn) {
+      console.log(data);
       if (data.transcript) {
         // clean transcript
         let cleanedTranscript = [];
