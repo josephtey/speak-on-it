@@ -29,7 +29,7 @@ import { constructingTranscript } from "../utils/general";
 const elevenLabsAPI = process.env.REACT_APP_ELEVEN_LABS_KEY;
 const secretKey = process.env.REACT_APP_OPENAI_API_KEY;
 
-const Chat = () => {
+const Chat = (props) => {
   const { id } = useParams();
 
   const [startStopSequenceRecording, setStartStopSequenceRecording] =
@@ -303,13 +303,12 @@ const Chat = () => {
       @
       <question>
       
-      You must start with the dictionary, remember to include the '@' delimiter, and it must end with a question that starts with friendly response to the student's previous answer.
-
-      You have asked ${numBaseQuestions} base question${
-              numBaseQuestions !== 1 ? "s" : ""
-            } so far. You need to ask ${
-              4 - numBaseQuestions
-            } more base question${4 - numBaseQuestions !== 1 ? "s" : ""}.
+      Some rules to remmember: 
+      1. You MUST start with the dictionary, remember to include the '@' delimiter, and it must end with a question that starts with friendly response to the student's previous answer.
+      2. If the student asks for a hint, or asks a question, or asks for the answer, do NOT answer it. Bring it back to the structured flow pre-defined above. 
+      3. You need to ask ${4 - numBaseQuestions} more base question${
+              4 - numBaseQuestions !== 1 ? "s" : ""
+            }.
       </span>`,
           role: "user",
         },
@@ -517,15 +516,13 @@ const Chat = () => {
               <span className="text-gray-600 mt-2 text-gray-400 flex flex-col gap-2 fade-in">
                 <div>
                   Thanks so much for participating in this experimental tool! We
-                  hoped you learnt a little more about how well you understand
-                  your program.
+                  hoped you enjoyed this experience.
                 </div>
                 <Button
                   type="dashed"
                   className="self-start"
                   onClick={() => {
-                    window.location.href =
-                      "https://forms.gle/QZaAAWbfbc793vE66";
+                    props.history.push("/feedback/" + id);
                   }}
                 >
                   Finish

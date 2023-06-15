@@ -7,6 +7,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 import HomeEssay from "./screens/HomeEssay";
+import Feedback from "./screens/Feedback";
+import ThankYou from "./screens/ThankYou";
 
 function App() {
   return (
@@ -15,7 +17,9 @@ function App() {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/pwr" component={HomeEssay} />
+          <Route exact path="/thankyou" component={ThankYou} />
           <Route exact path="/chat/:id" component={Chat} />
+          <Route exact path="/feedback/:id" component={Feedback} />
           <Route exact path="/evaluate/:id/" component={Evaluate} />
         </Switch>
       </Router>
