@@ -181,6 +181,6 @@ code {
   position: absolute;
 }
 
-.ant-form-item-required {
-  font-size: 20px !important;
+label {
+  font-size: 20px !important
 }

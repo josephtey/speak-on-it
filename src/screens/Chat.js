@@ -522,7 +522,12 @@ const Chat = (props) => {
                   type="dashed"
                   className="self-start"
                   onClick={() => {
-                    props.history.push("/feedback/" + id);
+                    if (assn.type === "essay") {
+                      props.history.push("/feedback/" + id);
+                    } else {
+                      window.location.href =
+                        "https://forms.gle/QZaAAWbfbc793vE66";
+                    }
                   }}
                 >
                   Finish

@@ -15,10 +15,19 @@ const Feedback = (props) => {
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      const fields = Object.keys(values);
+      const filteredValues = {};
       const assnRef = doc(db, "assns", id);
 
+      for (let i = 0; i < fields.length; i++) {
+        if (values[fields[i]]) {
+          filteredValues[fields[i]] = values[fields[i]];
+        } else {
+          filteredValues[fields[i]] = "";
+        }
+      }
       await updateDoc(assnRef, {
-        feedback: values,
+        feedback: filteredValues,
       });
 
       props.history.push("/thankyou");
@@ -181,12 +190,6 @@ const Feedback = (props) => {
             <Form.Item
               label="Pick the question that you were most excited to answer."
               name="excited_q"
-              rules={[
-                {
-                  required: true,
-                  message: "This can't be empty!",
-                },
-              ]}
             >
               <Select>
                 {questions.map((item, i) => {
@@ -199,23 +202,13 @@ const Feedback = (props) => {
               </Select>
             </Form.Item>
 
-            <Form.Item
-              label="Why?"
-              name="excited_reason"
-              rules={[{ required: true, message: "This can't be empty!" }]}
-            >
+            <Form.Item label="Why?" name="excited_reason">
               <Input />
             </Form.Item>
 
             <Form.Item
               label="Pick the question that you found was the most redundant to ask."
               name="redundant_q"
-              rules={[
-                {
-                  required: true,
-                  message: "This can't be empty!",
-                },
-              ]}
             >
               <Select>
                 {questions.map((item, i) => {
@@ -228,31 +221,24 @@ const Feedback = (props) => {
               </Select>
             </Form.Item>
 
-            <Form.Item
-              label="Why?"
-              name="redundant_reason"
-              rules={[{ required: true, message: "This can't be empty!" }]}
-            >
+            <Form.Item label="Why?" name="redundant_reason">
               <Input />
             </Form.Item>
             <Form.Item
               label="Reflecting on this experience, what is one thing you wished Liz could give you feedback on?"
               name="teachable"
-              rules={[{ required: true, message: "This can't be empty!" }]}
             >
               <Input />
             </Form.Item>
             <Form.Item
-              label="If you were to use this tool during PWR 2, at what point of the writing process would you find this to be most useful?"
+              label="If you were to use this tool during class, at what point of your learning process would you find this to be most useful?"
               name="helpful_stage"
-              rules={[{ required: true, message: "This can't be empty!" }]}
             >
               <Input />
             </Form.Item>
             <Form.Item
               label="Did Liz fail or stumble anywhere while replying or asking you questions?"
               name="any_errors"
-              rules={[{ required: true, message: "This can't be empty!" }]}
             >
               <Input />
             </Form.Item>
