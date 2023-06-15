@@ -175,7 +175,6 @@ const Chat = () => {
           assn.type === "graphics" ||
           assn.type === "essay"
         ) {
-          // console.log(allText.split("@")[1]);
           console.log("EVERYTHING: ", allText);
 
           try {
@@ -314,7 +313,6 @@ const Chat = () => {
 
   useEffect(() => {
     if (data && assn) {
-      console.log(data);
       if (data.transcript) {
         // clean transcript
         let cleanedTranscript = [];
