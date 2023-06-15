@@ -59,7 +59,6 @@ const Chat = () => {
     }
   }, [speaking, startStopSequenceRecording]);
 
-  const [baseQuestionsNum, setBaseQuestionsNum] = useState(0);
   const [voiceMode, setVoiceMode] = useState(true);
   const [details, setDetails] = useState(null);
   const [markers, setMarkers] = useState([]);
@@ -84,7 +83,6 @@ const Chat = () => {
       const docRef = doc(db, "assns", id);
       const docSnap = await getDoc(docRef);
       setData(docSnap.data());
-      setBaseQuestionsNum(docSnap.data().numBaseQuestions);
     };
 
     fetchData();
@@ -127,14 +125,6 @@ const Chat = () => {
         errors: [error],
       });
     }
-  };
-
-  const incrementBaseQuestionNum = async () => {
-    const essaysRef = doc(db, "assns", id);
-
-    await updateDoc(essaysRef, {
-      numBaseQuestions: baseQuestionsNum + 1,
-    });
   };
 
   useEffect(() => {
@@ -181,11 +171,6 @@ const Chat = () => {
             const details = JSON.parse(
               allText.split("@")[0].replaceAll("\n", "").trim()
             );
-
-            if (details.type === "baseQuestion") {
-              setBaseQuestionsNum(baseQuestionsNum + 1);
-              incrementBaseQuestionNum();
-            }
 
             setDetails(details);
             console.log("DETAILS: ", details);
@@ -248,7 +233,31 @@ const Chat = () => {
     };
   }, [AIState]);
 
+  const countNumBaseQuestions = (messages) => {
+    let count = 0;
+    for (let i = 0; i < messages.length; i++) {
+      if (
+        messages[i].content.includes("@") &&
+        messages[i].role === "assistant"
+      ) {
+        try {
+          const details = JSON.parse(
+            messages[i].content.split("@")[0].replaceAll("\n", "").trim()
+          );
+          if (details.type === "baseQuestion") {
+            count++;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return count;
+  };
+
   const onSend = () => {
+    const numBaseQuestions = countNumBaseQuestions(messages);
+
     if (
       assn.type === "console" ||
       assn.type === "karel" ||
@@ -271,11 +280,11 @@ const Chat = () => {
             
             You must start with the dictionary, remember to include the '@' delimiter, and it must end with a question. The question should also include a friendly response to the student's previous answer.
 
-            You have asked ${baseQuestionsNum} base question${
-              baseQuestionsNum !== 1 ? "s" : ""
+            You have asked ${numBaseQuestions} base question${
+              numBaseQuestions !== 1 ? "s" : ""
             } so far. You need to ask ${
-              2 - baseQuestionsNum
-            } more base question${2 - baseQuestionsNum !== 1 ? "s" : ""}.
+              2 - numBaseQuestions
+            } more base question${2 - numBaseQuestions !== 1 ? "s" : ""}.
             </span>`,
           role: "user",
         },
@@ -296,11 +305,11 @@ const Chat = () => {
       
       You must start with the dictionary, remember to include the '@' delimiter, and it must end with a question that starts with friendly response to the student's previous answer.
 
-      You have asked ${baseQuestionsNum} base question${
-              baseQuestionsNum !== 1 ? "s" : ""
+      You have asked ${numBaseQuestions} base question${
+              numBaseQuestions !== 1 ? "s" : ""
             } so far. You need to ask ${
-              2 - baseQuestionsNum
-            } more base question${2 - baseQuestionsNum !== 1 ? "s" : ""}.
+              4 - numBaseQuestions
+            } more base question${4 - numBaseQuestions !== 1 ? "s" : ""}.
       </span>`,
           role: "user",
         },

@@ -48,7 +48,6 @@ const Home = (props) => {
         code: basicValues.code,
         time: new Date().getTime(),
         codeAssignment: basicValues.assignment,
-        numBaseQuestions: 0,
       });
 
       props.history.push("/chat/" + newDoc.id);
