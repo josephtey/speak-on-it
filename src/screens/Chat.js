@@ -102,7 +102,7 @@ const Chat = (props) => {
   const [messages, submitQuery] = useChatCompletion({
     model: GPT4.BASE,
     apiKey: secretKey,
-    temperature: 0,
+    temperature: 0.8,
   });
 
   const update = async () => {
