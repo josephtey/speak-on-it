@@ -159,14 +159,16 @@ const Feedback = (props) => {
             </Form.Item>
 
             <Form.Item
-              label="Pick the question that helped you clarify your understanding of your essay the most."
+              label="On a scale of 1-10, to what extent do you feel like you better understood your assignment by speaking on it?"
+              name="clarifying_extent"
+              rules={[{ required: true, message: "This can't be empty!" }]}
+            >
+              <Slider max={10} min={0} />
+            </Form.Item>
+
+            <Form.Item
+              label="If it helped, pick the question that helped clarify your understanding of your essay the most."
               name="clarify_q"
-              rules={[
-                {
-                  required: true,
-                  message: "This can't be empty!",
-                },
-              ]}
             >
               <Select>
                 {questions.map((item, i) => {
@@ -182,7 +184,6 @@ const Feedback = (props) => {
             <Form.Item
               label="Why do you think this question helped clarify your understanding? ?"
               name="clarify_reason"
-              rules={[{ required: true, message: "This can't be empty!" }]}
             >
               <Input />
             </Form.Item>
@@ -239,6 +240,12 @@ const Feedback = (props) => {
             <Form.Item
               label="Did Liz fail or stumble anywhere while replying or asking you questions?"
               name="any_errors"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Do you have any other thoughs? How did you feel? Any general feedback?"
+              name="general_feedback"
             >
               <Input />
             </Form.Item>
