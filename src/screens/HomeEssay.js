@@ -2,7 +2,7 @@ import react, { useEffect, useState } from "react";
 import { Form, Input, Alert } from "antd";
 import { addDoc, collection } from "firebase/firestore";
 import { db, analytics } from "../utils/firebase";
-import { Select } from "antd";
+import { Select, Slider } from "antd";
 import Liz from "../img/liz.gif";
 import { logEvent } from "firebase/analytics";
 
@@ -27,7 +27,8 @@ const HomeEssay = (props) => {
       basicValues.name &&
       basicValues.email &&
       basicValues.essay &&
-      basicValues.assignment
+      basicValues.assignment &&
+      basicValues.precondition
     ) {
       const assnRef = collection(db, "assns");
       const newDoc = await addDoc(assnRef, {
@@ -36,6 +37,7 @@ const HomeEssay = (props) => {
         essay: basicValues.essay,
         time: new Date().getTime(),
         codeAssignment: basicValues.assignment,
+        precondition: basicValues.precondition,
       });
 
       props.history.push("/chat/" + newDoc.id);
@@ -187,6 +189,15 @@ const HomeEssay = (props) => {
                       );
                     })}
                   </Select>
+                </Form.Item>
+                <Form.Item
+                  label={
+                    "Truthfully, how well do you think you understand your RBA on a scale of 1-10?"
+                  }
+                  name="precondition"
+                  rules={[{ required: true, message: "This can't be empty!" }]}
+                >
+                  <Slider max={10} min={0} />
                 </Form.Item>
               </Form>
 

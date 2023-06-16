@@ -9,6 +9,7 @@ const Feedback = (props) => {
   const { id } = useParams();
 
   const [questions, setQuestions] = useState(null);
+  const [data, setData] = useState(null);
   const [error, setError] = useState(false);
   const [form] = Form.useForm();
 
@@ -36,18 +37,37 @@ const Feedback = (props) => {
     }
   };
 
+  const autoSave = async () => {
+    const values = await form.getFieldsValue(true);
+    const fields = Object.keys(values);
+    const filteredValues = {};
+    const assnRef = doc(db, "assns", id);
+
+    for (let i = 0; i < fields.length; i++) {
+      if (values[fields[i]]) {
+        filteredValues[fields[i]] = values[fields[i]];
+      } else {
+        filteredValues[fields[i]] = "";
+      }
+    }
+    await updateDoc(assnRef, {
+      feedback: filteredValues,
+    });
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       const docRef = doc(db, "assns", id);
       const docSnap = await getDoc(docRef);
       const assn = docSnap.data();
 
+      setData(assn);
+
       const transcript = assn.transcript;
       const finished =
         assn.transcript[transcript.length - 1].content.includes("closure");
-      const feedbackDone = assn.feedback;
       const questions = [];
-      if (transcript && finished && !feedbackDone) {
+      if (transcript && finished) {
         for (let i = 0; i < transcript.length; i++) {
           if (
             transcript[i].content.includes("@") &&
@@ -84,7 +104,7 @@ const Feedback = (props) => {
     fetchData();
   }, []);
 
-  return questions ? (
+  return data && questions ? (
     <div className="flex w-full items-center h-screen flex-wrap flex-col flex-nowrap lg:p-48">
       <div className="flex flex-col gap-8 w-full pb-8 items-center justify-center">
         <span className="text-4xl font-bold text-center mb-8">
@@ -97,17 +117,33 @@ const Feedback = (props) => {
             autoComplete="off"
             className="w-full min-h-fit"
             size={"large"}
+            onFieldsChange={() => {
+              autoSave();
+            }}
+            initialValues={data.feedback}
           >
             <Form.Item
-              label="How strong are your oral communication skills from 1-10?"
-              name="oral_skills"
+              label={
+                "Before this experience, you scored yourself a " +
+                data.precondition +
+                " out of 10 on how well you understood your RBA. After this experience, how well do you think you understand your RBA? (required)"
+              }
+              name="postcondition"
               rules={[{ required: true, message: "This can't be empty!" }]}
             >
               <Slider max={10} min={0} />
             </Form.Item>
 
             <Form.Item
-              label="Pick the question you struggled the most with."
+              label="Why? Is this lower? Is this higher? (required)"
+              name="postcondition_reason"
+              rules={[{ required: true, message: "This can't be empty!" }]}
+            >
+              <Input />
+            </Form.Item>
+
+            <Form.Item
+              label="Pick the question you struggled the most with. (required)"
               name="struggle_q"
               rules={[
                 {
@@ -128,7 +164,7 @@ const Feedback = (props) => {
             </Form.Item>
 
             <Form.Item
-              label="Why did you struggle with this question?"
+              label="Why did you struggle with this question? (required)"
               name="struggle_reason"
               rules={[{ required: true, message: "This can't be empty!" }]}
             >
@@ -136,7 +172,7 @@ const Feedback = (props) => {
             </Form.Item>
 
             <Form.Item
-              label="Primarily, which of the following reasons caused you to struggle with this question?"
+              label="Primarily, which of the following reasons caused you to struggle with this question? (required)"
               name="struggle_specific_reason"
               rules={[
                 {
@@ -159,15 +195,7 @@ const Feedback = (props) => {
             </Form.Item>
 
             <Form.Item
-              label="On a scale of 1-10, to what extent do you feel like you better understood your assignment by speaking on it?"
-              name="clarifying_extent"
-              rules={[{ required: true, message: "This can't be empty!" }]}
-            >
-              <Slider max={10} min={0} />
-            </Form.Item>
-
-            <Form.Item
-              label="If it helped, pick the question that helped clarify your understanding of your essay the most."
+              label="If this experience helped you learn, pick the question that helped clarify your understanding of your essay the most."
               name="clarify_q"
             >
               <Select>
@@ -182,7 +210,7 @@ const Feedback = (props) => {
             </Form.Item>
 
             <Form.Item
-              label="Why do you think this question helped clarify your understanding? ?"
+              label="Why do you think this question helped clarify your understanding?"
               name="clarify_reason"
             >
               <Input />
@@ -238,13 +266,7 @@ const Feedback = (props) => {
               <Input />
             </Form.Item>
             <Form.Item
-              label="Did Liz fail or stumble anywhere while replying or asking you questions?"
-              name="any_errors"
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="Do you have any other thoughs? How did you feel? Any general feedback?"
+              label="Do you have any other thoughts? How did you feel? Any general feedback?"
               name="general_feedback"
             >
               <Input />
