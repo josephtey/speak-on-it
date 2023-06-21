@@ -17,6 +17,10 @@ const assignment_items = [
     label: "Cassie Wright",
     value: "rba_cassie",
   },
+  {
+    label: "Other",
+    value: "rba_other",
+  },
 ];
 
 const HomeEssay = (props) => {
