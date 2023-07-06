@@ -122,25 +122,15 @@ const Feedback = (props) => {
             }}
             initialValues={data.feedback}
           >
-            <Form.Item
-              label={
-                "Before this experience, you scored yourself a " +
-                data.precondition +
-                " out of 10 on how well you understood your RBA. After this experience, how well do you think you understand your RBA? (required)"
-              }
-              name="postcondition"
-              rules={[{ required: true, message: "This can't be empty!" }]}
-            >
-              <Slider max={10} min={0} />
-            </Form.Item>
 
             <Form.Item
-              label="Why? Is this lower? Is this higher? (required)"
-              name="postcondition_reason"
+              label="How do you feel? Any general thoughts?"
+              name="feeling"
               rules={[{ required: true, message: "This can't be empty!" }]}
             >
               <Input />
             </Form.Item>
+
 
             <Form.Item
               label="Pick the question you struggled the most with. (required)"

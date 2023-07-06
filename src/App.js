@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 import HomeEssay from "./screens/HomeEssay";
+import HomeSpace from "./screens/HomeSpace";
 import Feedback from "./screens/Feedback";
 import ThankYou from "./screens/ThankYou";
 
@@ -16,6 +17,7 @@ function App() {
       <Router>
         <Switch>
           <Route exact path="/" component={Home} />
+          <Route exact path="/teachers" component={HomeSpace} />
           <Route exact path="/pwr" component={HomeEssay} />
           <Route exact path="/thankyou" component={ThankYou} />
           <Route exact path="/chat/:id" component={Chat} />

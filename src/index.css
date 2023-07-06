@@ -4,9 +4,7 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Nunito';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #FCFCFC;
@@ -184,4 +182,14 @@ code {
 label {
   font-size: 20px !important;
   height: 80px !important;
+}
+
+.ant-form-item-required, .ant-form-item-required:before {
+  font-family: 'Nunito';
+  font-size: 24px !important;
+}
+
+textarea, input {
+  font-size: 24px !important;
+  font-family: 'Nunito' !important;
 }

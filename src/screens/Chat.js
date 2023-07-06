@@ -1,20 +1,17 @@
 import react, { useEffect, useState, useRef } from "react";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db } from "../utils/firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../utils/firebase";
 import { useParams } from "react-router";
-import { useChatCompletion, GPT4, GPT35 } from "openai-streaming-hooks";
+import { useChatCompletion, GPT4 } from "openai-streaming-hooks";
 import ReactLoading from "react-loading";
-import { useWhisper } from "@chengsokdara/use-whisper";
-import { Button, Modal } from "antd";
-import ContentEditable from "react-contenteditable";
-import { Typewriter } from "typewriting-react";
+import { Button } from "antd";
 import LizStationary from "../img/liz_stationary.gif";
 import Liz from "../img/liz.gif";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-python";
 import "ace-builds/src-noconflict/theme-monokai";
-import textToSpeech from "../utils/elevenLabs";
-import Switch from "react-switch";
+import { v4 as uuidv4 } from 'uuid';
 import {
   generateEssaySystemPrompt,
   generateEssayUserPrompt,
@@ -24,45 +21,44 @@ import {
   generateCodeUserPrompt,
   generateKarelSystemPrompt,
 } from "../prompts/code";
-import { constructingTranscript } from "../utils/general";
 
+const mimeType = "audio/webm";
 const elevenLabsAPI = process.env.REACT_APP_ELEVEN_LABS_KEY;
 const secretKey = process.env.REACT_APP_OPENAI_API_KEY;
 
 const Chat = (props) => {
   const { id } = useParams();
 
-  const [startStopSequenceRecording, setStartStopSequenceRecording] =
-    useState(false);
-  const {
-    transcript,
-    startRecording,
-    stopRecording,
-    transcribing,
-    recording,
-    speaking,
-  } = useWhisper({
-    apiKey: secretKey,
-    streaming: true,
-    timeSlice: 1_000, // 1 second
-    whisperConfig: {
-      language: "en",
-    },
-  });
+  // const [startStopSequenceRecording, setStartStopSequenceRecording] =
+  //   useState(false);
+  // const {
+  //   transcript,
+  //   startRecording,
+  //   stopRecording,
+  //   transcribing,
+  //   recording,
+  //   speaking,
+  // } = useWhisper({
+  //   apiKey: secretKey,
+  //   streaming: true,
+  //   timeSlice: 1_000, // 1 second
+  //   whisperConfig: {
+  //     language: "en",
+  //   },
+  // });
 
-  useEffect(() => {
-    if (startStopSequenceRecording) {
-      if (!speaking) {
-        stopRecording();
-        setStartStopSequenceRecording(false);
-      }
-    }
-  }, [speaking, startStopSequenceRecording]);
+  // useEffect(() => {
+  //   if (startStopSequenceRecording) {
+  //     if (!speaking) {
+  //       stopRecording();
+  //       setStartStopSequenceRecording(false);
+  //     }
+  //   }
+  // }, [speaking, startStopSequenceRecording]);
 
   const [voiceMode, setVoiceMode] = useState(true);
   const [details, setDetails] = useState(null);
   const [markers, setMarkers] = useState([]);
-  const [promptText, setPromptText] = useState("");
   const [AIState, setAIState] = useState("thinking");
   // thinking -> gpt generation...
   // speaking -> liz is talking (typewriter animation!)
@@ -73,7 +69,6 @@ const Chat = (props) => {
   const [currentText, setCurrentText] = useState("");
   const [allText, setAllText] = useState("");
   const [textToVoice, setTextToVoice] = useState("");
-  const textInput = useRef();
 
   const [data, setData] = useState();
   const [assn, setAssn] = useState(null);
@@ -96,6 +91,14 @@ const Chat = (props) => {
     };
     if (data) {
       fetchAssnData(data.codeAssignment);
+    }
+
+    // set assignment data manually
+    if (data && data.task_prompt) {
+      setAssn({
+        assignment: data.task_prompt,
+        type: "essay"
+      })
     }
   }, [data]);
 
@@ -150,10 +153,108 @@ const Chat = (props) => {
     }
   }, [messages]);
 
+  const [permission, setPermission] = useState(false);
+
+	const mediaRecorder = useRef(null);
+
+	const [stream, setStream] = useState(null);
+
+	const [audioChunks, setAudioChunks] = useState([]);
+
+  const getMicrophonePermission = async () => {
+		if ("MediaRecorder" in window) {
+			try {
+				const mediaStream = await navigator.mediaDevices.getUserMedia({
+					audio: true,
+					video: false,
+				});
+				setPermission(true);
+				setStream(mediaStream);
+			} catch (err) {
+				alert(err.message);
+			}
+		} else {
+			alert("The MediaRecorder API is not supported in your browser.");
+		}
+	};
+
+  useEffect(()=>{
+    getMicrophonePermission()
+  }, [])
+
+	const startRecording = async () => {
+		const media = new MediaRecorder(stream, { type: mimeType });
+
+		mediaRecorder.current = media;
+
+		mediaRecorder.current.start();
+
+		let localAudioChunks = [];
+
+		mediaRecorder.current.ondataavailable = (event) => {
+			if (typeof event.data === "undefined") return;
+			if (event.data.size === 0) return;
+			localAudioChunks.push(event.data);
+		};
+
+		setAudioChunks(localAudioChunks);
+	};
+
+	const stopRecording = () => {
+		mediaRecorder.current.stop();
+
+		mediaRecorder.current.onstop = () => {
+			const audioBlob = new Blob(audioChunks, { type: mimeType });
+
+      const storageRef = ref(storage, 'speakonit/' + uuidv4() + ".webm");
+      uploadBytes(storageRef, audioBlob).then((snapshot) => {
+        getDownloadURL(snapshot.ref).then((downloadURL) => {
+          console.log('File available at', downloadURL);
+          setMediaUrl(downloadURL)
+        });
+      });
+			
+
+			setAudioChunks([]);
+		};
+	};
+
+  const [mediaURL, setMediaUrl] = useState(null)
+
+  useEffect(()=>{
+    const getTranscript = async (mediaUrl) => {
+      const apiEndpoint = "https://api.deepgram.com/v1/listen";
+      console.log(mediaUrl)
+      const payload = { "url": mediaUrl };
+      const headers = {
+          "accept": "application/json",
+          "content-type": "application/json",
+          "Authorization": "Token 7a7661a6c249f4cd680d880eac9b74f267ae5585"
+      };
+  
+      const response = await fetch(apiEndpoint, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      
+      console.log(data)
+      const transcript = data?.['results']?.['channels'][0]?.['alternatives']?.[0].transcript
+      onSend(transcript)
+      console.log(transcript)
+      return transcript
+  }
+    if (mediaURL){
+      // get transcript
+      getTranscript(mediaURL)
+
+    }
+  }, [mediaURL])
+
   const isLoading = messages[messages.length - 1]?.meta?.loading; //GPT loading
   useEffect(() => {
-    if (textInput.current) {
-      if (!isLoading) {
+      if (assn && !isLoading) {
         if (voiceMode) {
           setAIState("waiting");
         } else {
@@ -210,7 +311,6 @@ const Chat = (props) => {
         // setIsListening(true);
         // startRecording();
       }
-    }
   }, [isLoading]);
 
   useEffect(() => {
@@ -220,8 +320,8 @@ const Chat = (props) => {
           startRecording();
           setAIState("listening");
         } else if (AIState === "listening") {
-          setStartStopSequenceRecording(true);
-          setAIState("editing");
+          stopRecording()
+          setAIState("thinking");
         }
       }
     };
@@ -255,7 +355,7 @@ const Chat = (props) => {
     return count;
   };
 
-  const onSend = () => {
+  const onSend = (message) => {
     const numBaseQuestions = countNumBaseQuestions(messages);
 
     if (
@@ -266,7 +366,7 @@ const Chat = (props) => {
       submitQuery([
         {
           content:
-            promptText +
+            message +
             `\n<span>
             Remember, for every question you ask, if you are specifically referring to a code snippet in the student's code, output the following structure:
             {
@@ -293,7 +393,7 @@ const Chat = (props) => {
       submitQuery([
         {
           content:
-            promptText +
+            message +
             `\n<span>
       Remember, for every question you ask, output the following structure:
       {
@@ -316,7 +416,6 @@ const Chat = (props) => {
     }
     setAIState("thinking");
     setDetails(null);
-    setPromptText("");
   };
 
   useEffect(() => {
@@ -365,7 +464,7 @@ const Chat = (props) => {
         } else if (assn.type === "essay") {
           submitQuery([
             {
-              content: generateEssaySystemPrompt(data.essayPrompt, data.name),
+              content: generateEssaySystemPrompt(data.essayPrompt, data.question_1, data.question_2, data.question_3, data.name),
               role: "system",
             },
             { content: generateEssayUserPrompt(data.essay), role: "user" },
@@ -375,11 +474,6 @@ const Chat = (props) => {
     }
   }, [data, assn]);
 
-  useEffect(() => {
-    if (AIState === "listening" || AIState === "editing") {
-      setPromptText(transcript.text);
-    }
-  }, [transcript]);
   useEffect(() => {
     if (AIState === "speaking") {
       // textToSpeech("21m00Tcm4TlvDq8ikWAM", textToVoice, elevenLabsAPI, {
@@ -395,16 +489,6 @@ const Chat = (props) => {
 
   return data && assn ? (
     <div className="flex flex-col gap-4 items-center w-full lg:p-48 md:p-8">
-      <div className="bg-white rounded-lg drop-shadow-md p-4 self-end flex gap-4 items-center px-8">
-        <span className="text-gray-400">Voice Mode</span>
-        <Switch
-          onChange={(checked) => {
-            setVoiceMode(checked);
-          }}
-          disabled={AIState === "waiting" || AIState === "listening"}
-          checked={voiceMode}
-        />
-      </div>
       <div className="flex flex-row gap-4 justify-center w-full">
         <div className="flex w-1/2 pt-8 flex-wrap flex-col relative bg-white rounded-lg drop-shadow-md px-8">
           <div className="flex flex-row justify-between items-center w-full">
@@ -415,9 +499,9 @@ const Chat = (props) => {
                 <b>Liz</b>
               </span>
               {AIState === "thinking" ? (
-                <img src={Liz} className="rounded-lg w-36 mb-8" />
+                <img src={Liz} className="rounded-lg w-24 mb-8" />
               ) : (
-                <img src={LizStationary} className="rounded-lg w-36 mb-8" />
+                <img src={LizStationary} className="rounded-lg w-24 mb-8" />
               )}
             </div>
             {AIState === "thinking" ? (
@@ -430,14 +514,14 @@ const Chat = (props) => {
                 />
               </div>
             ) : null}
-            {details?.question ? (
+            {details?.question && AIState !== "thinking" ? (
               <div className="bg-yellow-300 rounded-lg p-4 fade-in w-1/2 text-right">
                 {details.question}
               </div>
             ) : null}
           </div>
           <div>
-            <div className="font-serif text-xl text-left" id="content">
+            <div className="font-serif text-lg text-left" id="content">
               {currentText}
             </div>
             {/* {messages.length < 1
@@ -475,8 +559,8 @@ const Chat = (props) => {
                   type="dashed"
                   className="self-start"
                   onClick={() => {
-                    setStartStopSequenceRecording(true);
                     setAIState("editing");
+                    stopRecording()
                   }}
                 >
                   Stop Speaking
@@ -523,7 +607,9 @@ const Chat = (props) => {
                   className="self-start"
                   onClick={() => {
                     if (assn.type === "essay") {
-                      props.history.push("/feedback/" + id);
+                      window.location.href = window.location.origin + "/feedback/" + id
+
+                      props.history.push();
                     } else {
                       window.location.href =
                         "https://forms.gle/QZaAAWbfbc793vE66";
@@ -588,7 +674,7 @@ const Chat = (props) => {
         ) : assn.type === "essay" ? (
           <div className="w-1/2 elative bg-[#fffaed] h-[600px] rounded-lg drop-shadow-md px-8 overflow-scroll">
             <h2 className="text-[#725424] font-serif font-bold">
-              For reference, here is your essay.{" "}
+              For reference, here is your student's essay.{" "}
             </h2>
             <div className="text-[#725424] font-serif pt-8 r">
               {data.essay.split("\n").map((para) => {
@@ -598,7 +684,7 @@ const Chat = (props) => {
           </div>
         ) : null}
       </div>
-      <div className="flex bg-white rounded-lg drop-shadow-md p-8 w-full flex-row gap-4">
+      {/* <div className="flex bg-white rounded-lg drop-shadow-md p-8 w-full flex-row gap-4">
         <form
           className="w-full flex flex-row gap-4 items-start"
           onSubmit={(e) => {
@@ -618,18 +704,8 @@ const Chat = (props) => {
             className="bg-gray-50 rounded-lg p-8 w-full outline-none text-gray-700"
             html={promptText ? promptText : null}
           />
-
-          {AIState === "editing" && !transcribing && !recording && !speaking ? (
-            <Button
-              onClick={() => {
-                onSend();
-              }}
-            >
-              Send
-            </Button>
-          ) : null}
         </form>
-      </div>
+      </div> */}
     </div>
   ) : (
     <div className="flex w-full justify-center content-center h-screen flex-wrap flex-col">
