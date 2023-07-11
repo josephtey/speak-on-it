@@ -108,7 +108,8 @@ const HomeSpace = (props) => {
                     Please be aware that this is an <b className="underline">experimental playground.</b> There <b>may</b> be hallucinations, bugs, and we are working on more guardrails to ensure this product is safe for the classroom.
                 </b><br/><br />
 
-                <p>Before we start, please watch a short recorded demo of our product. </p>
+                <p>Before we start, please watch a short recorded demo of our product. </p><br/>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/fQufkrlJOvY" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
               </div>
               <div className="flex flex-row justify-between w-full mt-16">
                 <div
