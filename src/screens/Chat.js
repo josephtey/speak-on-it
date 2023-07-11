@@ -464,10 +464,10 @@ const Chat = (props) => {
         } else if (assn.type === "essay") {
           submitQuery([
             {
-              content: generateEssaySystemPrompt(data.essayPrompt, data.question_1, data.question_2, data.question_3, data.name),
+              content: generateEssaySystemPrompt(data.task_type, data.task_prompt, data.question_1, data.question_2, data.question_3, data.name, data.grade),
               role: "system",
             },
-            { content: generateEssayUserPrompt(data.essay), role: "user" },
+            { content: generateEssayUserPrompt(data.task_type, data.essay), role: "user" },
           ]);
         }
       }
@@ -488,7 +488,7 @@ const Chat = (props) => {
   }, [AIState]);
 
   return data && assn ? (
-    <div className="flex flex-col gap-4 items-center w-full lg:p-48 md:p-8">
+    <div className="flex flex-col gap-4 items-center w-full lg:p-36 md:p-8">
       <div className="flex flex-row gap-4 justify-center w-full">
         <div className="flex w-1/2 pt-8 flex-wrap flex-col relative bg-white rounded-lg drop-shadow-md px-8">
           <div className="flex flex-row justify-between items-center w-full">
@@ -559,7 +559,7 @@ const Chat = (props) => {
                   type="dashed"
                   className="self-start"
                   onClick={() => {
-                    setAIState("editing");
+                    setAIState("thinking");
                     stopRecording()
                   }}
                 >
@@ -674,7 +674,7 @@ const Chat = (props) => {
         ) : assn.type === "essay" ? (
           <div className="w-1/2 elative bg-[#fffaed] h-[600px] rounded-lg drop-shadow-md px-8 overflow-scroll">
             <h2 className="text-[#725424] font-serif font-bold">
-              For reference, here is your student's essay.{" "}
+              For reference, here is {data.task_type === "Student-Based Assignment" ? "your student's essay." : "the provided reading."}
             </h2>
             <div className="text-[#725424] font-serif pt-8 r">
               {data.essay.split("\n").map((para) => {

@@ -124,15 +124,34 @@ const Feedback = (props) => {
           >
 
             <Form.Item
-              label="How do you feel? Any general thoughts?"
+              label="We’d love to hear about your conversation. How did you feel? Do you have any thoughts about the experience?"
               name="feeling"
               rules={[{ required: true, message: "This can't be empty!" }]}
             >
-              <Input />
+              <Input.TextArea />
             </Form.Item>
-
-
             <Form.Item
+              label="To what extent do you feel that Liz’ questions were an extension of you, and aligned with how you tuned it? Did it react differently than you expected?"
+              name="extension"
+              rules={[{ required: true, message: "This can't be empty!" }]}
+            >
+              <Input.TextArea />
+            </Form.Item>
+            <Form.Item
+              label="Do you like having control over the questions that the AI asks, or do you want to let the AI decide what questions to ask?"
+              name="control"
+              rules={[{ required: true, message: "This can't be empty!" }]}
+            >
+              <Input.TextArea />
+            </Form.Item>
+            <Form.Item
+              label="Reflecting back on your answers, as a teacher, what do you think distinguished your strong oral responses from your weaker ones?"
+              name="distinguish"
+              rules={[{ required: true, message: "This can't be empty!" }]}
+            >
+              <Input.TextArea />
+            </Form.Item>
+            {/* <Form.Item
               label="Pick the question you struggled the most with. (required)"
               name="struggle_q"
               rules={[
@@ -151,116 +170,7 @@ const Feedback = (props) => {
                   );
                 })}
               </Select>
-            </Form.Item>
-
-            <Form.Item
-              label="Why did you struggle with this question? (required)"
-              name="struggle_reason"
-              rules={[{ required: true, message: "This can't be empty!" }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Primarily, which of the following reasons caused you to struggle with this question? (required)"
-              name="struggle_specific_reason"
-              rules={[
-                {
-                  required: true,
-                  message: "This can't be empty!",
-                },
-              ]}
-            >
-              <Select>
-                <Select.Option value={"oral"}>
-                  Poor Oral Communication Skills
-                </Select.Option>
-                <Select.Option value={"understanding"}>
-                  Lack of Understanding of Paper
-                </Select.Option>
-                <Select.Option value={"both"}>
-                  Combination of Both
-                </Select.Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              label="If this experience helped you learn, pick the question that helped clarify your understanding of your essay the most."
-              name="clarify_q"
-            >
-              <Select>
-                {questions.map((item, i) => {
-                  return (
-                    <Select.Option value={item.details}>
-                      <b>Question {i + 1}: </b> {item.question}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              label="Why do you think this question helped clarify your understanding?"
-              name="clarify_reason"
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Pick the question that you were most excited to answer."
-              name="excited_q"
-            >
-              <Select>
-                {questions.map((item, i) => {
-                  return (
-                    <Select.Option value={item.details}>
-                      <b>Question {i + 1}: </b> {item.question}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-
-            <Form.Item label="Why?" name="excited_reason">
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Pick the question that you found was the most redundant to ask."
-              name="redundant_q"
-            >
-              <Select>
-                {questions.map((item, i) => {
-                  return (
-                    <Select.Option value={item.details}>
-                      <b>Question {i + 1}: </b> {item.question}
-                    </Select.Option>
-                  );
-                })}
-              </Select>
-            </Form.Item>
-
-            <Form.Item label="Why?" name="redundant_reason">
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="Reflecting on this experience, what is one thing you wished Liz could give you feedback on?"
-              name="teachable"
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="If you were to use this tool during class, at what point of your learning process would you find this to be most useful?"
-              name="helpful_stage"
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="Do you have any other thoughts? How did you feel? Any general feedback?"
-              name="general_feedback"
-            >
-              <Input />
-            </Form.Item>
+            </Form.Item> */}
           </Form>
         </div>
         <div
