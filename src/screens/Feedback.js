@@ -3,7 +3,7 @@ import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "../utils/firebase";
 import { useParams } from "react-router";
 import ReactLoading from "react-loading";
-import { Form, Input, Select, Slider } from "antd";
+import { Form, Input, Select, Slider, Button } from "antd";
 
 const Feedback = (props) => {
   const { id } = useParams();
@@ -151,6 +151,18 @@ const Feedback = (props) => {
             >
               <Input.TextArea />
             </Form.Item>
+            <Form.Item
+              label="Who is one other teacher who you think would be excited to try this tool?"
+              name="teacher_referral"
+              rules={[{ required: true, message: "This can't be empty!" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Button onClick={()=>{
+              window.open("https://calendly.com/joetey/30min?back=1&month=2023-07", "_blank");                
+            }}>
+              Schedule a chat with us!
+            </Button>
             {/* <Form.Item
               label="Pick the question you struggled the most with. (required)"
               name="struggle_q"
