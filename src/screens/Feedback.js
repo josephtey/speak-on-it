@@ -152,7 +152,7 @@ const Feedback = (props) => {
               <Input.TextArea />
             </Form.Item>
             <Form.Item
-              label="Who is one other teacher who you think would be excited to try this tool?"
+              label="Who is one other teacher who you think would be excited to try this tool? What is their email?"
               name="teacher_referral"
               rules={[{ required: true, message: "This can't be empty!" }]}
             >
