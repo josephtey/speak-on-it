@@ -275,6 +275,16 @@ const HomeSpace = (props) => {
                 </Form.Item>
 
                 <Form.Item
+                  label="What subject do you teach?"
+                  name="subject"
+                  rules={[
+                    { required: true, message: "This can't be empty." },
+                  ]}
+                >
+                  <Input placeholder={"e.g. English"} />
+                </Form.Item>
+
+                <Form.Item
                     label="What grade is this task for?"
                     name="grade"
                     rules={[
@@ -321,7 +331,7 @@ const HomeSpace = (props) => {
                   className="rounded-lg text-white bg-blue-500 hover:bg-blue-600 cursor-pointer px-8 py-4 font-bold w-54 text-center self-center mb-4"
                   onClick={() => {
                     const values = basicInfoForm.getFieldsValue(true)
-                    if (values.task_prompt && values.grade && values.frequency) {
+                    if (values.task_prompt && values.grade && values.frequency && values.subject) {
                         setStep(6);
                         setShowError(false);
                     } else {
@@ -360,13 +370,16 @@ const HomeSpace = (props) => {
                 </Form.Item>
                 
                 <div className="mt-16 text-2xl">
-                    What are <b>3</b> questions you'd want the AI to ask your students <b>about {basicInfoForm.getFieldsValue(true).task_type === "Student-Based Assignment" ? "their essay" : "the reading"}</b>? <br/><br/>
+                Design 3 questions that you would want to give the AI to direct the flow of the conversation. <br/><br/>
 
-                    We will generate a conversation that is anchored by the following 3 questions, while also dynamically probing, responding to, and engaging with the student. You can input specific questions you would like to ask your students, or ask the AI to look
-                    for something specific in your student’s work.  
+                There are two types of questions you can design! <br/><br/>
+
+                  1. You can provide the AI with a <b>specific question</b> you would ask your student. This approach creates a conversation that is more reliable and has little variance. However, it compromises on the personalisation and dynamic probing that we believe this AI is uniquely strong at doing. <br/><br/>For example, “What is a meaningful phrase you came across in the reading, and why did it stand out to you?”<br/> <br/>
+
+                  2. You can provide the AI with an <b>intent</b> you would like to see your student respond to. This, presents the AI with the ability to choose the specific question based on a student’s response or writing. <br/><br/>For example, “Based on the student’s premise, present a counter argument to them, and ask them how they would respond.”<br/>
                 </div>
                 <Form.Item
-                    label="What would you do?"
+                    label="What will your 3 questions be?"
                     name="question_1"
                     rules={[
                         { required: true, message: "This can't be empty." },

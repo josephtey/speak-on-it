@@ -108,7 +108,7 @@ const Feedback = (props) => {
     <div className="flex w-full items-center h-screen flex-wrap flex-col flex-nowrap lg:p-48">
       <div className="flex flex-col gap-8 w-full pb-8 items-center justify-center">
         <span className="text-4xl font-bold text-center mb-8">
-          What are your thoughts?
+          Thanks so much for using Speak On It!
         </span>
         <div className="mb-16 flex flex-col items-center text-xl bg-white rounded-lg shadow-md p-8 w-full">
           <Form
