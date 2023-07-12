@@ -8,6 +8,7 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import "./App.css";
 import HomeEssay from "./screens/HomeEssay";
 import HomeSpace from "./screens/HomeSpace";
+import Dashboard from "./screens/Dashboard";
 import Feedback from "./screens/Feedback";
 import ThankYou from "./screens/ThankYou";
 
@@ -18,6 +19,7 @@ function App() {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/teachers" component={HomeSpace} />
+          <Route exact path="/dashboard" component={Dashboard} />
           <Route exact path="/pwr" component={HomeEssay} />
           <Route exact path="/thankyou" component={ThankYou} />
           <Route exact path="/chat/:id" component={Chat} />
