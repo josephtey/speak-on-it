@@ -206,7 +206,7 @@ const Chat = (props) => {
 		mediaRecorder.current.onstop = () => {
 			const audioBlob = new Blob(audioChunks, { type: mimeType });
 
-      const storageRef = ref(storage, 'speakonit/' + uuidv4() + ".webm");
+      const storageRef = ref(storage, 'speakonit/' + id + "/" + uuidv4() + ".webm");
       uploadBytes(storageRef, audioBlob).then((snapshot) => {
         getDownloadURL(snapshot.ref).then((downloadURL) => {
           console.log('File available at', downloadURL);

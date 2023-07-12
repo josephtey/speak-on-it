@@ -367,7 +367,7 @@ const HomeSpace = (props) => {
                     },
                   ]}
                 >
-                  <TextArea showCount rows={10} />
+                  <TextArea showCount maxLength={25000} rows={10} />
                 </Form.Item>
                 
                 <div className="mt-16 text-2xl">
