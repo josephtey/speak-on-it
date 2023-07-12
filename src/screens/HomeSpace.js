@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Form, Input, Alert, Select } from "antd";
+import { Form, Input, Alert, Select, Button } from "antd";
 import { addDoc, collection } from "firebase/firestore";
 import { db, analytics } from "../utils/firebase";
 import Liz from "../img/liz.gif";
@@ -67,6 +67,15 @@ const HomeSpace = (props) => {
                 <p>We understand that AI is a little scary! Cheating is rampant, and ChatGPT is <i>everywhere</i></p>
                 <p>However, we don't believe the solution is to introduce more surveillance. We don't believe in banning AI in classrooms, for ultimately, we have to embrace this technology.</p>
                 <p>Instead, we believe that classrooms need to be more process-oriented, conversational, and fundamentally, we need to rethink the way we assess our students.</p>
+
+                <Button
+                  onClick = {()=>{
+                    window.location.href =
+                    "https://www.facebook.com/groups/293798259708045/";
+                  }}
+                >
+                  To stay in touch with us,<b className="mx-2">click here</b> to join our Facebook Group! 
+                </Button>
                 <p className="text-center text-4xl m-16 gap-4 leading-relaxed">
                     
                     We believe that if you <b>truly understand something</b>, you
@@ -138,7 +147,7 @@ const HomeSpace = (props) => {
                 autoComplete="off"
                 className="w-full min-h-fit"
                 size={"large"}
-                style={{fontFamily: 'Nunito', fontSize: '30px'}}
+                style={{fontFamily: 'Arial', fontSize: '30px'}}
             >
                 <div className="text-2xl py-4 flex flex-col gap-3 mb-8">
                     <b>Before we get started, let's start with some basic information!</b>
@@ -195,7 +204,7 @@ const HomeSpace = (props) => {
                 autoComplete="off"
                 className="w-full min-h-fit"
                 size={"large"}
-                style={{fontFamily: 'Nunito', fontSize: '30px'}}
+                style={{fontFamily: 'Arial', fontSize: '30px'}}
               >
                 <div className="text-2xl py-4 flex flex-col gap-3">
                     <b>Step 1: How do you think Speak on It! would work best in your class?</b>
@@ -257,7 +266,7 @@ const HomeSpace = (props) => {
                 }}
                 className="w-full min-h-fit"
                 size={"large"}
-                style={{fontFamily: 'Nunito', fontSize: '24px'}}
+                style={{fontFamily: 'Arial', fontSize: '24px'}}
               >
                 <div className="text-2xl py-4 flex flex-col gap-3">
                     <b>Step 2: Design Your Assignment</b>
@@ -355,7 +364,7 @@ const HomeSpace = (props) => {
                 autoComplete="off"
                 className="w-full min-h-fit"
                 size={"large"}
-                style={{fontFamily: 'Nunito', fontSize: '30px'}}
+                style={{fontFamily: 'Arial', fontSize: '30px'}}
               >
             <Form.Item
                   label={basicInfoForm.getFieldsValue(true).task_type === "Student-Based Assignment" ? "Paste a sample student response for the assignment" : "Paste the reading that you want your students to speak on."}

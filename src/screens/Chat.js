@@ -489,6 +489,17 @@ const Chat = (props) => {
 
   return data && assn ? (
     <div className="flex flex-col gap-4 items-center w-full lg:p-36 md:p-8">
+       <div className="bg-white rounded-lg drop-shadow-md p-4 self-end flex gap-4 items-center px-8">
+        <Button
+          onClick={()=>{
+            if(window.confirm("Are you sure? This will end the experience.")) {
+              window.location.href = window.location.origin + "/feedback/" + id
+
+              props.history.push();
+            }
+          }}
+        >Give Feedback Now</Button>
+      </div>
       <div className="flex flex-row gap-4 justify-center w-full">
         <div className="flex w-1/2 pt-8 flex-wrap flex-col relative bg-white rounded-lg drop-shadow-md px-8">
           <div className="flex flex-row justify-between items-center w-full">

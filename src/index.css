@@ -4,7 +4,7 @@
 
 body {
   margin: 0;
-  font-family: 'Nunito';
+  font-family: 'Arial';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: #FCFCFC;
@@ -185,11 +185,11 @@ label {
 }
 
 .ant-form-item-required, .ant-form-item-required:before {
-  font-family: 'Nunito';
+  font-family: 'Arial';
   font-size: 24px !important;
 }
 
 textarea, input {
   font-size: 24px !important;
-  font-family: 'Nunito' !important;
+  font-family: 'Arial' !important;
 }

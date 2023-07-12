@@ -64,10 +64,10 @@ const Feedback = (props) => {
       setData(assn);
 
       const transcript = assn.transcript;
-      const finished =
-        assn.transcript[transcript.length - 1].content.includes("closure");
+      // const finished =
+      //   assn.transcript[transcript.length - 1].content.includes("closure");
       const questions = [];
-      if (transcript && finished) {
+      if (transcript) {
         for (let i = 0; i < transcript.length; i++) {
           if (
             transcript[i].content.includes("@") &&
