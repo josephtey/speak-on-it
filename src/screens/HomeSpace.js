@@ -64,19 +64,21 @@ const HomeSpace = (props) => {
                     </p>
                     <img src={StanfordLogo} className="h-32" />
                 </div>
-                <p>We understand that AI is a little scary! Cheating is rampant, and ChatGPT is <i>everywhere</i></p>
-                <p>However, we don't believe the solution is to introduce more surveillance. We don't believe in banning AI in classrooms, for ultimately, we have to embrace this technology.</p>
-                <p>Instead, we believe that classrooms need to be more process-oriented, conversational, and fundamentally, we need to rethink the way we assess our students.</p>
-
-                <Button
-                  onClick = {()=>{
+                <div
+                  className="rounded-lg text-white bg-blue-500 hover:bg-blue-600 cursor-pointer px-8 py-4 font-bold w-54 text-center self-center text-lg mt-4 mb-10"
+                  onClick={() => {
                     window.location.href =
                     "https://www.facebook.com/groups/293798259708045/";
                   }}
                 >
-                  To stay in touch with us,<b className="mx-2">click here</b> to join our Facebook Group! 
-                </Button>
-                <p className="text-center text-4xl m-16 gap-4 leading-relaxed">
+                  To stay in touch with us, <b>click here</b> to join our Facebook Group! 
+                  </div>
+
+                <p>We understand that AI is a little scary! Cheating is rampant, and ChatGPT is <i>everywhere</i></p>
+                <p>However, we don't believe the solution is to introduce more surveillance. We don't believe in banning AI in classrooms, for ultimately, we have to embrace this technology.</p>
+                <p>Instead, we believe that classrooms need to be more process-oriented, conversational, and fundamentally, we need to rethink the way we assess our students.</p>
+
+                <p className="text-center text-4xl m-12 gap-4 leading-relaxed">
                     
                     We believe that if you <b>truly understand something</b>, you
                     should be able to <b>Speak On It!</b>
