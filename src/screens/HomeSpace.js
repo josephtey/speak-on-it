@@ -60,7 +60,7 @@ const HomeSpace = (props) => {
                     <img src={JoeDP} className="rounded-full h-32" />
                     <img src={ShauryaDP} className="rounded-full h-32" />
                     <p className="px-8">
-                        We are Joe & Shaurya, two Stanford students researching at the <a href="https://piechlab.stanford.edu/">AI and Education lab</a>, really trying to re-imagine what education <b>should</b> look like in the age of AI. 
+                        We are Joe & Shaurya, two Stanford students researching at the <a href="https://piechlab.stanford.edu/">Piech Lab</a>, really trying to re-imagine what education <b>should</b> look like in the age of AI. 
                     </p>
                     <img src={StanfordLogo} className="h-32" />
                 </div>

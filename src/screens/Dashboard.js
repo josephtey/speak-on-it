@@ -85,7 +85,7 @@ const [data, setData] = useState(null)
         <b className="text-xl">Questions</b>
             <div>
                 {data.map(item => {
-                if (item.question_1 && item.question_2 && item.question_3) {
+                if (item.question_1 && item.question_2 && item.question_3 && item.task_type === "Student-Based Assignment") {
                     return (
                     <div className="mb-4">
                         <b>{item.task_type}</b><br/>
